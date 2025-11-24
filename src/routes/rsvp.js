@@ -1,7 +1,34 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import db from "../db/index.js";
 
 const router = Router();
+const ACCESS_COOKIE = process.env.ACCESS_COOKIE || "rsvp_auth";
+const ACCESS_CODE = process.env.ACCESS_CODE;
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+router.use(limiter);
+
+router.use((req, res, next) => {
+  const cookie = req.headers.cookie || "";
+  const hasCookie = cookie
+    .split(";")
+    .map((c) => c.trim())
+    .some((c) => c.startsWith(`${ACCESS_COOKIE}=`));
+  const headerCode = req.headers["x-access-code"];
+  const hasHeaderAccess = ACCESS_CODE && headerCode === ACCESS_CODE;
+
+  if (!hasCookie && !hasHeaderAccess) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next();
+});
 
 router.post("/", async (req, res) => {
   const {
