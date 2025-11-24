@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RSVP | Rofel & Julie Ann</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+  />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="rsvp-page">
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        Rofel &amp; Julie Ann
+        <span>May 18, 2026 • Batac City</span>
+      </a>
+      <button
+        class="navbar-toggler border-0"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon">
+          <i class="bi bi-list fs-2"></i>
+        </span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav align-items-lg-center">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/rsvp">RSVP</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <section class="rsvp-hero">
+    <div class="container">
+      <div class="rsvp-hero-card">
+        <div>
+          <span class="hero-chip">
+            <i class="bi bi-stars"></i> Wedding RSVP
+          </span>
+          <h1 class="display-6 mb-2">We’re saving you a seat</h1>
+          <p class="text-muted mb-0">Walk through the steps to let us know who’s coming and how we can make dinner perfect for everyone.</p>
+        </div>
+        <div class="hero-badge">
+          <div class="hero-date">May 18, 2026</div>
+          <div class="hero-place">Batac City, Ilocos Norte</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container py-4 py-lg-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow-sm rsvp-card-shell">
+          <div class="card-body p-4 p-lg-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <p class="text-uppercase text-muted small mb-1">Rofel & Julie Ann</p>
+                <h1 class="h4 mb-0">Wedding RSVP</h1>
+              </div>
+              <span class="badge bg-secondary">May 18, 2026</span>
+            </div>
+
+            <div class="progress mb-4" style="height: 8px;">
+              <div class="progress-bar rsvp-progress" id="rsvpProgress" role="progressbar" style="width: 25%;" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+
+            <form id="walkthroughForm" class="rsvp-walkthrough">
+              <div class="rsvp-step" data-step="1">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="step-pill">1</span>
+                  <h2 class="h5 mb-0">Your details</h2>
+                </div>
+                <div class="mb-3">
+                  <label for="name" class="form-label">Full Name</label>
+                  <input type="text" class="form-control" id="name" placeholder="Your name" required />
+                </div>
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email Address</label>
+                  <input type="email" class="form-control" id="email" placeholder="you@example.com" required />
+                </div>
+              </div>
+
+              <div class="rsvp-step d-none" data-step="2">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="step-pill">2</span>
+                  <h2 class="h5 mb-0">Attendance</h2>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Will you attend?</label>
+                  <select class="form-select" id="attendance" required>
+                    <option value="" selected disabled>Select an option</option>
+                    <option value="yes">Yes! I’ll be there 🎉</option>
+                    <option value="maybe">Not sure yet, but trying!</option>
+                    <option value="no">I can’t make it 😔</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="guests" class="form-label">Number of Guests (including you)</label>
+                  <input type="number" class="form-control" id="guests" min="1" max="10" value="1" required />
+                  <div class="form-text">If you can’t attend, leave this as 1.</div>
+                </div>
+              </div>
+
+              <div class="rsvp-step d-none" data-step="3">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="step-pill">3</span>
+                  <h2 class="h5 mb-0">Guest details</h2>
+                </div>
+                <p class="text-muted small mb-3">Add names and dietary needs for everyone so we can seat and serve safely.</p>
+                <div id="guestDetailsList" class="d-flex flex-column gap-3"></div>
+              </div>
+
+              <div class="rsvp-step d-none" data-step="4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="step-pill">4</span>
+                  <h2 class="h5 mb-0">Playlist & message</h2>
+                </div>
+                <div class="mb-3">
+                  <label for="song" class="form-label">Song Request (optional)</label>
+                  <input type="text" class="form-control" id="song" placeholder="Song title & artist" />
+                </div>
+                <div class="mb-3">
+                  <label for="message" class="form-label">Message for the couple</label>
+                  <textarea class="form-control" id="message" rows="3" placeholder="Excited messages, advice, jokes, anything!"></textarea>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mt-4">
+                <button class="btn btn-outline-secondary" type="button" id="prevStepBtn">Back</button>
+                <div>
+                  <button class="btn btn-primary" type="button" id="nextStepBtn">Next</button>
+                  <button class="btn btn-wedding-primary d-none" type="submit" id="submitRsvpBtn">Submit RSVP</button>
+                </div>
+              </div>
+              <div class="mt-3" id="rsvpAlert" style="display: none;"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script src="/js/rsvp-walkthrough.js"></script>
+</body>
+</html>

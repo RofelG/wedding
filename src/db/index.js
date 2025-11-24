@@ -16,9 +16,35 @@ db.serialize(() => {
       guest_count INTEGER DEFAULT 1,
       song_request TEXT,
       message TEXT,
+      plus_one_names TEXT,
+      food_allergies TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`
   );
+
+  // Backfill column if the table already existed without plus_one_names.
+  db.all("PRAGMA table_info(guests)", (err, rows) => {
+    if (err) {
+      console.warn("Could not inspect guests table", err);
+      return;
+    }
+    const hasPlusOne = rows.some((col) => col.name === "plus_one_names");
+    const hasAllergy = rows.some((col) => col.name === "food_allergies");
+    if (!hasPlusOne) {
+      db.run("ALTER TABLE guests ADD COLUMN plus_one_names TEXT", (alterErr) => {
+        if (alterErr) {
+          console.warn("Could not add plus_one_names column", alterErr);
+        }
+      });
+    }
+    if (!hasAllergy) {
+      db.run("ALTER TABLE guests ADD COLUMN food_allergies TEXT", (alterErr) => {
+        if (alterErr) {
+          console.warn("Could not add food_allergies column", alterErr);
+        }
+      });
+    }
+  });
 });
 
 function runAsync(query, params = []) {
@@ -37,11 +63,22 @@ const insertRsvp = async ({
   attendance,
   song,
   message,
+  plusOneNames,
+  allergies,
 }) => {
   const result = await runAsync(
-    `INSERT INTO guests (full_name, email, attendance, guest_count, song_request, message)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [name, email, attendance, guests, song || null, message || null]
+    `INSERT INTO guests (full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      name,
+      email,
+      attendance,
+      guests,
+      song || null,
+      message || null,
+      plusOneNames || null,
+      allergies || null,
+    ]
   );
   return { id: result.id };
 };

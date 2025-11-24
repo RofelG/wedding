@@ -390,6 +390,88 @@ footer {
     transform: translateY(0);
 }
 
+/* RSVP page */
+.rsvp-page {
+    background: radial-gradient(circle at 10% 20%, rgba(255, 182, 193, 0.22), transparent 35%),
+                radial-gradient(circle at 85% 10%, rgba(255, 111, 145, 0.15), transparent 30%),
+                #fff9fb;
+    min-height: 100vh;
+}
+
+.rsvp-hero {
+    padding: 120px 0 40px;
+}
+
+.rsvp-hero-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+    padding: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border: 1px solid rgba(255, 111, 145, 0.12);
+}
+
+.rsvp-hero .hero-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--wedding-accent);
+    color: var(--wedding-primary);
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.rsvp-hero .hero-badge {
+    text-align: right;
+    color: var(--wedding-dark);
+}
+
+.rsvp-hero .hero-date {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.rsvp-hero .hero-place {
+    font-size: 0.95rem;
+    color: #6c757d;
+}
+
+.rsvp-card-shell {
+    border-radius: 16px;
+}
+
+.rsvp-progress {
+    background: linear-gradient(90deg, var(--wedding-primary), #ffa6c5);
+}
+
+.step-pill {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--wedding-accent);
+    color: var(--wedding-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(255, 111, 145, 0.25);
+}
+
+.rsvp-walkthrough .guest-item {
+    background: #fff;
+    border: 1px solid rgba(52, 58, 64, 0.08);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.rsvp-walkthrough .guest-item[data-index] {
+    background: rgba(255, 229, 236, 0.45);
+}
+
 @media (max-width: 767.98px) {
     #hero {
     text-align: center;

@@ -78,7 +78,66 @@ function scrollToSection(id) {
 (function initRSVPForm() {
   var form = document.getElementById("rsvpForm");
   var alertBox = document.getElementById("rsvpAlert");
+  var guestsInput = document.getElementById("guests");
+  var guestDetailsGroup = document.getElementById("guestDetailsGroup");
+  var guestDetailsList = document.getElementById("guestDetailsList");
+  var primaryNameInput = document.getElementById("name");
   if (!form || !alertBox) return;
+
+  // Build per-guest name/allergy inputs based on guest count
+  function renderGuestDetails() {
+    var count = Number(guestsInput.value || 1);
+    if (!guestDetailsList) return;
+    guestDetailsList.innerHTML = "";
+
+    // Primary guest allergy field
+    var primaryWrapper = document.createElement("div");
+    primaryWrapper.className = "guest-item";
+    var primaryLabel = document.createElement("label");
+    primaryLabel.className = "form-label";
+    primaryLabel.textContent = "Your food allergies or dietary needs (optional)";
+    var primaryInput = document.createElement("input");
+    primaryInput.type = "text";
+    primaryInput.className = "form-control guest-allergies";
+    primaryInput.id = "primaryAllergies";
+    primaryWrapper.appendChild(primaryLabel);
+    primaryWrapper.appendChild(primaryInput);
+    guestDetailsList.appendChild(primaryWrapper);
+
+    // Additional guest entries
+    for (var i = 2; i <= count; i++) {
+      var guestWrapper = document.createElement("div");
+      guestWrapper.className = "guest-item";
+      guestWrapper.dataset.index = i.toString();
+
+      var nameLabel = document.createElement("label");
+      nameLabel.className = "form-label";
+      nameLabel.textContent = "Guest " + i + " name";
+      var nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.className = "form-control guest-name";
+      nameInput.required = true;
+
+      var allergyLabel = document.createElement("label");
+      allergyLabel.className = "form-label mt-2";
+      allergyLabel.textContent = "Guest " + i + " allergies or dietary needs (optional)";
+      var allergyInput = document.createElement("input");
+      allergyInput.type = "text";
+      allergyInput.className = "form-control guest-allergies";
+
+      guestWrapper.appendChild(nameLabel);
+      guestWrapper.appendChild(nameInput);
+      guestWrapper.appendChild(allergyLabel);
+      guestWrapper.appendChild(allergyInput);
+      guestDetailsList.appendChild(guestWrapper);
+    }
+
+    if (guestDetailsGroup) {
+      guestDetailsGroup.style.display = count >= 1 ? "block" : "none";
+    }
+  }
+  guestsInput.addEventListener("input", renderGuestDetails);
+  renderGuestDetails();
 
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -91,6 +150,36 @@ function scrollToSection(id) {
     var song = document.getElementById("song").value.trim();
     var message = document.getElementById("message").value.trim();
 
+    var guestDetails = [];
+    var primaryAllergiesInput = document.getElementById("primaryAllergies");
+    guestDetails.push({
+      name: name,
+      allergies: primaryAllergiesInput ? primaryAllergiesInput.value.trim() : "",
+    });
+
+    var additionalGuests = guestDetailsList
+      ? guestDetailsList.querySelectorAll(".guest-item[data-index]")
+      : [];
+    for (var i = 0; i < additionalGuests.length; i++) {
+      var guestItem = additionalGuests[i];
+      var guestNameInput = guestItem.querySelector(".guest-name");
+      var guestAllergyInput = guestItem.querySelector(".guest-allergies");
+      var guestName = guestNameInput ? guestNameInput.value.trim() : "";
+      var guestAllergy = guestAllergyInput ? guestAllergyInput.value.trim() : "";
+
+      if (!guestName) {
+        alertBox.className = "alert alert-danger";
+        alertBox.textContent = "Please provide the name for guest " + guestItem.dataset.index + ".";
+        alertBox.style.display = "block";
+        return;
+      }
+
+      guestDetails.push({
+        name: guestName,
+        allergies: guestAllergy,
+      });
+    }
+
     try {
       var res = await fetch("/api/rsvp", {
         method: "POST",
@@ -102,6 +191,7 @@ function scrollToSection(id) {
           attendance,
           song,
           message,
+          guestDetails,
         }),
       });
 
