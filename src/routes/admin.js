@@ -2,8 +2,6 @@ import { Router } from "express";
 import db from "../db/index.js";
 
 const router = Router();
-const ADMIN_USER = process.env.ADMIN_USER || "admin";
-const ADMIN_PASS = process.env.ADMIN_PASSWORD || "changeme";
 
 function unauthorized(res) {
   res.set("WWW-Authenticate", 'Basic realm="RSVP Admin"');
@@ -11,6 +9,9 @@ function unauthorized(res) {
 }
 
 function checkAuth(req, res, next) {
+  const ADMIN_USER = process.env.ADMIN_USER || "admin";
+  const ADMIN_PASS = process.env.ADMIN_PASSWORD || "changeme";
+
   const header = req.headers.authorization || "";
   if (!header.startsWith("Basic ")) {
     return unauthorized(res);

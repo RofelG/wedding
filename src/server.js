@@ -1,11 +1,9 @@
+import "./config/loadEnv.js";
 import path from "path";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import rsvpRouter from "./routes/rsvp.js";
 import adminRouter from "./routes/admin.js";
-
-dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -50,6 +48,7 @@ function accessGate(message) {
   <title>RSVP Access</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <meta name="robots" content="noindex,nofollow" />
 </head>
 <body class="bg-light">
   <div class="container py-5">
