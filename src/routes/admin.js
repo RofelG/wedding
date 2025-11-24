@@ -30,7 +30,8 @@ router.use((req, res, next) => {
 });
 
 router.get("/", checkAuth, (req, res) => {
-  res.sendFile("admin.html", { root: "src/views" });
+  const navLinks = [{ href: "/admin", text: "Admin", active: true }];
+  res.render("admin", { navLinks });
 });
 
 router.get("/data", checkAuth, async (_req, res) => {
