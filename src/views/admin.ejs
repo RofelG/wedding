@@ -17,9 +17,13 @@
   </style>
 </head>
 <body>
-  <div class="container py-4">
+  <%- include('partials/nav', { navLinks: [{ href: '/admin', text: 'Admin', active: true }], brandHref: '/admin' }) %>
+  <div class="container py-5">
     <div class="d-flex align-items-center justify-content-between mb-3">
-      <h1 class="h4 mb-0">RSVP Admin</h1>
+      <div>
+        <p class="text-uppercase text-muted small mb-1">RSVP Dashboard</p>
+        <h1 class="h4 mb-0">RSVP Admin</h1>
+      </div>
       <span class="pill text-muted">Protected</span>
     </div>
     <div id="status" class="alert alert-info">Loading responses…</div>
