@@ -112,7 +112,6 @@ document.addEventListener("DOMContentLoaded", function () {
         showAlert("Guest count must be at least 1.");
         return false;
       }
-      renderGuestDetails();
     } else if (index === 2) {
       var guestItems = guestDetailsList
         ? guestDetailsList.querySelectorAll(".guest-item[data-index]")
@@ -137,7 +136,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   nextBtn.addEventListener("click", function () {
-    if (!validateStep(currentStep)) return;
+    if (!validateStep(currentStep)) {
+      showStep(currentStep);
+      return;
+    }
     if (currentStep < steps.length - 1) {
       showStep(currentStep + 1);
     }
@@ -156,7 +158,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
-    if (!validateStep(0) || !validateStep(1) || !validateStep(2)) {
+    if (!validateStep(0)) {
+      showStep(0);
+      return;
+    }
+    if (!validateStep(1)) {
+      showStep(1);
+      return;
+    }
+    if (!validateStep(2)) {
+      showStep(2);
       return;
     }
 

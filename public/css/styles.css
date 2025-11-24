@@ -38,6 +38,47 @@
   color: var(--wedding-primary) !important;
 }
 
+.navbar-toggler {
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+}
+
+.navbar-toggler-icon {
+  background-image: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-with-logo {
+  display: inline-flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
+.brand-logo {
+  height: 120px;
+  width: auto;
+}
+
+.navbar-toggler {
+  background: transparent;
+  border: none;
+  color: #fff;
+}
+
+.navbar-toggler-icon {
+  background-image: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-toggler-icon i {
+  color: var(--wedding-primary);
+}
+
 /* Hero */
 #hero {
   min-height: 100vh;
@@ -265,6 +306,9 @@ section {
   background: #fff;
   border: 2px solid var(--wedding-primary);
 }
+.story-dot-filled {
+  background: var(--wedding-primary);
+}
 
 .story-tag {
   display: inline-block;
@@ -319,7 +363,7 @@ section {
 
 /* RSVP */
 #rsvp {
-  background: linear-gradient(135deg, rgba(255, 182, 193, 0.25), rgba(255, 255, 255, 0.9));
+  background: linear-gradient(135deg, rgba(255, 182, 193, 0.28), rgba(255, 255, 255, 0.92));
 }
 
 .rsvp-card {
@@ -422,11 +466,13 @@ footer {
 .rsvp-hero .hero-date {
   font-weight: 700;
   font-size: 1.1rem;
+  padding: 0.4rem;
 }
 
 .rsvp-hero .hero-place {
   font-size: 0.95rem;
   color: #6c757d;
+  padding: 0.4rem;
 }
 
 .rsvp-card-shell {
@@ -464,6 +510,7 @@ footer {
 @media (max-width: 767.98px) {
   #hero {
     text-align: center;
+    min-height: 125vh; /* prevent scroll hint from overlapping illustration on short screens */
   }
   .hero-card {
     margin-top: 2.5rem;
@@ -479,5 +526,128 @@ footer {
   }
   .story-dot {
     left: 2px;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --wedding-primary: #ff9fbd;
+    --wedding-secondary: #ffa6c5;
+    --wedding-accent: #2a2f3a;
+    --wedding-dark: #f2f2f2;
+  }
+  body {
+    background-color: #0f1116;
+    color: #e6e6e6;
+  }
+  .navbar {
+    background: rgba(18, 20, 28, 0.8);
+  }
+  .navbar-brand span,
+  .nav-link {
+    color: #d7d7d7;
+  }
+  .hero-card,
+  .detail-card,
+  .rsvp-card,
+  .rsvp-card-shell,
+  .rsvp-hero-card,
+  .rsvp-walkthrough .guest-item,
+  .card {
+    background: #161a23;
+    color: #e6e6e6;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .hero-subtitle,
+  .text-muted,
+  .card-text,
+  .story-date {
+    color: #b9beca !important;
+  }
+  .badge-soft {
+    background: rgba(255, 159, 189, 0.2);
+    color: var(--wedding-primary);
+  }
+  #hero {
+    background: radial-gradient(circle at 20% 10%, rgba(255, 159, 189, 0.14), transparent 35%), radial-gradient(circle at 90% 0%, rgba(255, 159, 189, 0.12), transparent 30%), #0f1116;
+  }
+  .hero-badge {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e6e6e6;
+  }
+  .hero-names {
+    color: #f7f7f7;
+  }
+  .hero-names span {
+    color: var(--wedding-primary);
+  }
+  .hero-subtitle {
+    color: #cdd2dd;
+  }
+  .hero-chip {
+    background: rgba(255, 159, 189, 0.18);
+    color: var(--wedding-primary);
+  }
+  .countdown-number {
+    color: #f7f7f7;
+  }
+  .countdown-label {
+    color: #b9beca;
+  }
+  .countdown-item {
+    background: rgba(22, 26, 35, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .hero-scroll {
+    color: #e6e6e6;
+  }
+  #rsvp {
+    background: linear-gradient(135deg, rgba(255, 159, 189, 0.28), rgba(15, 17, 22, 0.92));
+  }
+  footer {
+    background: #0f1116;
+    color: #9aa0ad;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .rsvp-page {
+    background: radial-gradient(circle at 10% 20%, rgba(255, 159, 189, 0.22), transparent 35%), radial-gradient(circle at 85% 10%, rgba(255, 111, 145, 0.18), transparent 30%), #0f1116;
+  }
+  .form-control,
+  .form-select {
+    background: #1c202a;
+    color: #f2f2f2;
+    border-color: #3a4050;
+  }
+  .form-control::-moz-placeholder {
+    color: #9aa0ad;
+  }
+  .form-control::placeholder {
+    color: #9aa0ad;
+  }
+  .navbar-toggler {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .navbar-toggler-icon i {
+    color: #fff;
+  }
+}
+@media (max-width: 767.98px) {
+  .navbar-brand.brand-with-logo {
+    font-size: 0;
+    gap: 0;
+  }
+  .navbar-brand.brand-with-logo span {
+    display: none;
+  }
+  .navbar-brand.brand-with-logo .brand-logo {
+    height: 36px;
+  }
+}
+@media (max-width: 575.98px) {
+  .rsvp-hero .hero-badge {
+    font-size: 0.9rem;
+    line-height: 1.2;
+    text-align: left;
   }
 }/*# sourceMappingURL=styles.css.map */

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RSVP Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { background: #0f1116; color: #e6e6e6; }
+    .table thead { background: rgba(255, 159, 189, 0.12); }
+    .badge-yes { background: #198754; }
+    .badge-maybe { background: #ffc107; color: #111; }
+    .badge-no { background: #dc3545; }
+    .card { background: #161a23; border: 1px solid rgba(255,255,255,0.08); }
+    .pill { border-radius: 999px; padding: 2px 10px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.08); }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h1 class="h4 mb-0">RSVP Admin</h1>
+      <span class="pill text-muted">Protected</span>
+    </div>
+    <div id="status" class="alert alert-info">Loading responses…</div>
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm table-dark align-middle" id="rsvpTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Attendance</th>
+                <th>Guests</th>
+                <th>Plus Ones</th>
+                <th>Allergies</th>
+                <th>Song</th>
+                <th>Message</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function badge(att) {
+      if (att === "yes") return '<span class="badge badge-yes">Yes</span>';
+      if (att === "maybe") return '<span class="badge badge-maybe">Maybe</span>';
+      if (att === "no") return '<span class="badge badge-no">No</span>';
+      return att || "";
+    }
+
+    function fmtPlusNames(row) {
+      return row.plus_one_names || "";
+    }
+
+    function fmtAllergies(row) {
+      if (!row.food_allergies) return "";
+      if (Array.isArray(row.food_allergies)) {
+        return row.food_allergies.map(g => (g.name ? g.name + (g.allergies ? " (" + g.allergies + ")" : "") : g.allergies)).filter(Boolean).join("; ");
+      }
+      return row.food_allergies;
+    }
+
+    async function loadData() {
+      const status = document.getElementById("status");
+      try {
+        const res = await fetch("/admin/data");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load");
+        status.className = "visually-hidden";
+        const tbody = document.querySelector("#rsvpTable tbody");
+        tbody.innerHTML = "";
+        data.rows.forEach((row) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${row.id}</td>
+            <td>${row.full_name}</td>
+            <td>${row.email}</td>
+            <td>${badge(row.attendance)}</td>
+            <td>${row.guest_count}</td>
+            <td>${fmtPlusNames(row)}</td>
+            <td>${fmtAllergies(row)}</td>
+            <td>${row.song_request || ""}</td>
+            <td>${row.message || ""}</td>
+            <td>${row.created_at || ""}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        status.className = "alert alert-danger";
+        status.textContent = err.message;
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

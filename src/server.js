@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import rsvpRouter from "./routes/rsvp.js";
+import adminRouter from "./routes/admin.js";
 
 dotenv.config();
 
@@ -10,6 +11,9 @@ const app = express();
 const port = process.env.PORT || 3000;
 const accessCode = process.env.ACCESS_CODE || "LOVE2026";
 const accessCookie = "rsvp_auth";
+const logoUrl = process.env.LOGO_URL || "";
+const logoBase = process.env.LOGO_BASE || "";
+const logoType = process.env.LOGO_TYPE || "";
 const publicDir = path.join(process.cwd(), "public");
 const rsvpViewPath = path.join(process.cwd(), "src", "views", "rsvp.html");
 
@@ -17,6 +21,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(publicDir));
+
+// Expose minimal config to the front-end
+app.get("/config.js", (_req, res) => {
+  res.type("application/javascript").send(`window.SITE_CONFIG = {
+    logoUrl: ${JSON.stringify(logoUrl)},
+    logoBase: ${JSON.stringify(logoBase)},
+    logoType: ${JSON.stringify(logoType)}
+  };`);
+});
 
 function hasAccess(req) {
   const cookie = req.headers.cookie || "";
@@ -98,6 +111,7 @@ app.post("/rsvp/access", (req, res) => {
 });
 
 app.use("/api/rsvp", rsvpRouter);
+app.use("/admin", adminRouter);
 
 app.listen(port, () => {
   console.log(`Wedding site running on http://localhost:${port}`);
