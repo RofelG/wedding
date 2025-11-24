@@ -13,12 +13,15 @@ const logoUrl = process.env.LOGO_URL || "";
 const logoBase = process.env.LOGO_BASE || "";
 const logoType = process.env.LOGO_TYPE || "";
 const publicDir = path.join(process.cwd(), "public");
-const rsvpViewPath = path.join(process.cwd(), "src", "views", "rsvp.html");
+const viewsDir = path.join(process.cwd(), "src", "views");
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(publicDir));
+
+app.set("view engine", "ejs");
+app.set("views", viewsDir);
 
 // Expose minimal config to the front-end
 app.get("/config.js", (_req, res) => {
@@ -80,7 +83,11 @@ app.get("/rsvp", (req, res) => {
     res.status(401).send(accessGate());
     return;
   }
-  res.sendFile(rsvpViewPath);
+  const navLinks = [
+    { href: "/", text: "Home" },
+    { href: "/rsvp", text: "RSVP", active: true },
+  ];
+  res.render("rsvp", { navLinks });
 });
 
 app.get("/rsvp/:code", (req, res) => {
@@ -107,6 +114,16 @@ app.post("/rsvp/access", (req, res) => {
     `${accessCookie}=1; HttpOnly; Path=/; SameSite=Lax; Max-Age=${60 * 60 * 24}`
   );
   res.redirect("/rsvp");
+});
+
+app.get("/", (_req, res) => {
+  const navLinks = [
+    { href: "#story", text: "Our Story" },
+    { href: "#details", text: "Details" },
+    { href: "#gallery", text: "Gallery" },
+    { href: "/rsvp", text: "RSVP" },
+  ];
+  res.render("home", { navLinks });
 });
 
 app.use("/api/rsvp", rsvpRouter);

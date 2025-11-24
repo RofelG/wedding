@@ -5,82 +5,26 @@
   <title>Rofel & Julie Ann | Wedding Website</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Bootstrap 5.3 CSS -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
     crossorigin="anonymous"
   />
-
-  <!-- Google Fonts (optional) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;500;600&display=swap"
     rel="stylesheet"
   />
-
-  <!-- Bootstrap Icons (optional, for fun icons) -->
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
   />
-
-  <style>
-    html {
-        scroll-padding-top: 80px;
-    }
-    body {
-        font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-        scroll-behavior: smooth;
-        background-color: #fff9fb;
-    }
-  </style>
-
-  <link rel="stylesheet" href="css/styles.css" />
-  
+  <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg fixed-top">
-    <div class="container">
-      <a class="navbar-brand" href="#hero">
-        Rofel &amp; Julie Ann
-        <span>May 18, 2026 · Batac City</span>
-      </a>
-      <button
-        class="navbar-toggler border-0"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon">
-          <i class="bi bi-list fs-2"></i>
-        </span>
-      </button>
-      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-        <ul class="navbar-nav align-items-lg-center">
-          <li class="nav-item">
-            <a class="nav-link active" href="#story">Our Story</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#details">Details</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#gallery">Gallery</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/rsvp">RSVP</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <%- include('partials/nav', { navLinks, brandHref: '#hero' }) %>
 
   <!-- Hero -->
   <header id="hero">
@@ -92,12 +36,10 @@
             <span>We’re getting married!</span>
           </div>
           <h1 class="hero-names">
-            <div class="hero-name">
-              Rofel <span>&amp;</span> Julie Ann
-            </div>
+            Rofel <span>&amp;</span> Julie Ann
           </h1>
           <p class="hero-subtitle mt-1">
-            May 18, 2026 · Batac City, Ilocos Norte
+            May 18, 2026 • Batac City, Ilocos Norte
           </p>
           <p class="mt-3 text-muted">
             Pack your smiles, your dancing shoes, and a whole lot of energy—because this
@@ -140,15 +82,13 @@
               </span>
               <h4>Save the Date</h4>
               <p class="mb-1 text-muted">
-                <strong>Monday · May 18, 2026</strong>
+                <strong>Monday • May 18, 2026</strong>
               </p>
               <p class="mb-2 text-muted">
-                Ceremony &amp; Reception · Venue TBA (but it’s going to be beautiful, we
-                promise 🌸)
+                Ceremony &amp; Reception • Venue TBA (but it’s going to be beautiful, we promise!)
               </p>
               <p class="mb-0 text-muted">
-                Join us for good food, loud laughter, and a night of dancing under the
-                stars.
+                Join us for good food, loud laughter, and a night of dancing under the stars.
               </p>
             </div>
             <div class="hero-floating-heart hero-floating-heart--left">
@@ -189,24 +129,24 @@
         <div class="col-md-6">
           <div class="story-timeline">
             <div class="story-item">
-              <div class="story-dot story-dot-filled"></div>
+              <div class="story-dot"></div>
               <div class="story-tag">The First Hello</div>
               <div class="story-date">Batac City, Ilocos Norte, Philippines</div>
               <p class="mb-0 text-muted">
-                It started with a simple conversation that somehow never really ended. 
+                It started with a simple conversation that somehow never really ended.
               </p>
             </div>
             <div class="story-item">
-              <div class="story-dot story-dot-filled"></div>
+              <div class="story-dot"></div>
               <div class="story-tag">Long-Distance Days</div>
               <div class="story-date">Calls, chats &amp; countdowns</div>
               <p class="mb-0 text-muted">
-                Two countries, one love story–powered by Wi-Fi, patience, and a lot of
+                Two countries, one love story—powered by Wi-Fi, patience, and a lot of
                 inside jokes.
               </p>
             </div>
-            <div class="story-item ">
-              <div class="story-dot story-dot-filled"></div>
+            <div class="story-item">
+              <div class="story-dot"></div>
               <div class="story-tag">The Proposal</div>
               <div class="story-date">The moment we said “Let’s do this”</div>
               <p class="mb-0 text-muted">
@@ -214,15 +154,15 @@
               </p>
             </div>
             <div class="story-item">
-              <div class="story-dot story-dot-filled"></div>
+              <div class="story-dot"></div>
               <div class="story-tag">The Big Day</div>
-              <div class="story-date">May 8, 2025 · Batac City</div>
+              <div class="story-date">May 8, 2025 • Batac City</div>
               <p class="mb-0 text-muted">
                 A small gathering of our favorite people and a livestream for those far away, we said "I do"!
               </p>
             </div>
             <div class="story-item">
-              <div class="story-dot story-dot-filled"></div>
+              <div class="story-dot"></div>
               <div class="story-tag">More Planning</div>
               <div class="story-date">Back to Long-Distance</div>
               <p class="mb-0 text-muted">
@@ -232,7 +172,7 @@
             <div class="story-item">
               <div class="story-dot"></div>
               <div class="story-tag">The Big Day (Part 2)</div>
-              <div class="story-date">May 18, 2026 · Batac City</div>
+              <div class="story-date">May 18, 2026 • Batac City</div>
                 <p class="mb-0 text-muted">
                     This time, it’s the celebration we’ve been dreaming of—with all our favorite people in one place!
                 </p>
@@ -364,7 +304,6 @@
         <h2>Gallery Sneak Peek</h2>
       </div>
       <div class="row g-3">
-        <!-- You can replace these with your own images -->
         <div class="col-6 col-md-3">
           <img
             src="https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=800"
@@ -404,7 +343,7 @@
   <section id="rsvp" class="fade-section">
     <div class="container">
       <div class="section-title">
-        <p>We?d love to see you</p>
+        <p>We’d love to see you</p>
         <h2>RSVP</h2>
       </div>
       <div class="row justify-content-center">
@@ -420,30 +359,15 @@
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="text-center">
-    <div class="container">
-      <p class="mb-1">
-        Made with <span class="footer-heart">♥</span> by Rofel &amp; Julie Ann
-      </p>
-      <p class="mb-0">
-        Can’t wait to celebrate with you on <strong>May 18, 2026</strong>!
-      </p>
-    </div>
-  </footer>
+  <%- include('partials/footer') %>
 
-  <!-- Bootstrap 5.3 JS Bundle -->
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"
   ></script>
-
-  <!-- Config + Branding -->
   <script src="/config.js"></script>
   <script src="/js/brand.js"></script>
-
-  <!-- Custom JS -->
-    <script src="js/scripts.js"></script>
+  <script src="/js/scripts.js"></script>
 </body>
 </html>
