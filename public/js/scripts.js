@@ -1,9 +1,41 @@
-// Smooth scroll helper
+// Smooth scroll helper WITH offset for fixed nav
 function scrollToSection(id) {
   var el = document.getElementById(id);
   if (!el) return;
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  // Get fixed navbar height (adjust selector if needed)
+  var nav = document.querySelector(".navbar");
+  var navHeight = nav ? nav.offsetHeight : 0;
+
+  // Extra breathing room under the nav (optional)
+  var extraOffset = 16; // px
+
+  // Element position relative to the document
+  var y =
+    el.getBoundingClientRect().top +
+    window.pageYOffset -
+    navHeight -
+    extraOffset;
+
+  window.scrollTo({
+    top: y,
+    behavior: "smooth",
+  });
 }
+
+document.addEventListener("click", function (e) {
+  var link = e.target.closest('a[href^="#"]');
+  if (!link) return;
+
+  var id = link.getAttribute("href").substring(1);
+  if (!id) return;
+
+  var target = document.getElementById(id);
+  if (!target) return;
+
+  e.preventDefault();
+  scrollToSection(id);
+});
 
 // Countdown timer
 (function initCountdown() {
