@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import rsvpRouter from "./routes/rsvp.js";
 import adminRouter from "./routes/admin.js";
+import mediaRouter from "./routes/media.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -140,12 +141,14 @@ app.get("/", (_req, res) => {
     { href: "#details", text: "Details" },
     { href: "#gallery", text: "Gallery" },
     { href: "/rsvp", text: "RSVP" },
+    { href: "/media", text: "Share Memories" },
   ];
   res.render("home", { navLinks });
 });
 
 app.use("/api/rsvp", rsvpRouter);
 app.use("/admin", adminRouter);
+app.use("/media", mediaRouter);
 
 app.listen(port, () => {
   console.log(`Wedding site running on http://localhost:${port}`);
