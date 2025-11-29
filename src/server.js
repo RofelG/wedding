@@ -1,5 +1,6 @@
 import "./config/loadEnv.js";
 import path from "path";
+import fs from "fs";
 import express from "express";
 import cors from "cors";
 import rsvpRouter from "./routes/rsvp.js";
@@ -136,6 +137,17 @@ app.post("/rsvp/access", (req, res) => {
 });
 
 app.get("/", (_req, res) => {
+  const galleryDir = path.join(publicDir, "img", "gallery");
+  let galleryImages = [];
+  try {
+    const files = fs.readdirSync(galleryDir);
+    galleryImages = files
+      .filter((f) => /\.(jpe?g|png|gif|webp|avif)$/i.test(f))
+      .map((f) => `/img/gallery/${f}`);
+  } catch (err) {
+    console.warn("Could not read gallery directory", err.message);
+  }
+
   const navLinks = [
     { href: "#story", text: "Our Story" },
     { href: "#details", text: "Details" },
@@ -143,7 +155,7 @@ app.get("/", (_req, res) => {
     { href: "/rsvp", text: "RSVP" },
     { href: "/media", text: "Share Memories" },
   ];
-  res.render("home", { navLinks });
+  res.render("home", { navLinks, galleryImages });
 });
 
 app.use("/api/rsvp", rsvpRouter);
