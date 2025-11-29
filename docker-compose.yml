@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: wedding-app
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      PORT: 3000
+      ACCESS_CODE: ${ACCESS_CODE:-LOVE2026}
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-changeme}
+      DB_CLIENT: ${DB_CLIENT:-sqlite}
+      DB_PATH: ${DB_PATH:-/data/wedding.db}
+      MYSQL_HOST: ${MYSQL_HOST:-db}
+      MYSQL_PORT: ${MYSQL_PORT:-3306}
+      MYSQL_USER: ${MYSQL_USER:-wedding}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-wedding}
+      MYSQL_POOL: ${MYSQL_POOL:-10}
+      LOGO_URL: ${LOGO_URL:-}
+      LOGO_BASE: ${LOGO_BASE:-}
+      LOGO_TYPE: ${LOGO_TYPE:-}
+      MEDIA_ACCESS_CODE: ${MEDIA_ACCESS_CODE:-LOVE2026}
+      MEDIA_OPEN_DATE: ${MEDIA_OPEN_DATE:-2026-05-18T00:00:00Z}
+      MEDIA_FORCE_OPEN: ${MEDIA_FORCE_OPEN:-false}
+      UPLOADS_DIR: ${UPLOADS_DIR:-/data/uploads}
+    volumes:
+      - app-data:/data
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:11
+    container_name: wedding-db
+    restart: always
+    environment:
+      MARIADB_DATABASE: ${MYSQL_DATABASE:-wedding}
+      MARIADB_USER: ${MYSQL_USER:-wedding}
+      MARIADB_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootsecret}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  app-data:
+  db-data:
