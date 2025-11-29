@@ -306,38 +306,21 @@
         <h2>Gallery Sneak Peek</h2>
       </div>
       <div class="row g-3">
-        <div class="col-6 col-md-3">
-          <img
-            src="https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=800"
-            alt="Couple holding hands"
-            class="gallery-img"
-          />
-        </div>
-        <div class="col-6 col-md-3">
-          <img
-            src="https://images.pexels.com/photos/1024992/pexels-photo-1024992.jpeg?auto=compress&cs=tinysrgb&w=800"
-            alt="Wedding bouquet"
-            class="gallery-img"
-          />
-        </div>
-        <div class="col-6 col-md-3">
-          <img
-            src="https://images.pexels.com/photos/4172931/pexels-photo-4172931.jpeg?auto=compress&cs=tinysrgb&w=800"
-            alt="Wedding rings"
-            class="gallery-img"
-          />
-        </div>
-        <div class="col-6 col-md-3">
-          <img
-            src="https://images.pexels.com/photos/2959192/pexels-photo-2959192.jpeg?auto=compress&cs=tinysrgb&w=800"
-            alt="Wedding party celebration"
-            class="gallery-img"
-          />
-        </div>
+        <% if (galleryImages && galleryImages.length) { %>
+          <% galleryImages.forEach(function(src) { %>
+            <div class="col-6 col-md-3">
+              <img src="<%= src %>" alt="Wedding gallery photo" class="gallery-img" loading="lazy" />
+            </div>
+          <% }); %>
+        <% } else { %>
+          <p class="text-center text-muted mb-0">Gallery coming soon.</p>
+        <% } %>
       </div>
-      <p class="text-center text-muted mt-3 mb-0">
-        We’ll add more photos as we get closer to the big day!
-      </p>
+      <% if (!galleryImages || !galleryImages.length) { %>
+        <p class="text-center text-muted mt-3 mb-0">
+          We'll add more photos as we get closer to the big day!
+        </p>
+      <% } %>
     </div>
   </section>
 
