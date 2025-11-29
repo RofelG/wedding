@@ -1,5 +1,5 @@
 import path from "path";
-import sqlite3 from "sqlite3";
+import Database from "better-sqlite3";
 import mysql from "mysql2/promise";
 const client = (process.env.DB_CLIENT || "sqlite").toLowerCase();
 
@@ -71,57 +71,42 @@ if (client === "mysql" || client === "mariadb") {
   };
 } else {
   const dbPath = process.env.DB_PATH || path.join(process.cwd(), "wedding.db");
-  const sqlite = sqlite3.verbose();
-  const db = new sqlite.Database(dbPath);
+  const db = new Database(dbPath);
+  db.pragma("journal_mode = WAL");
+  db.prepare(
+    `CREATE TABLE IF NOT EXISTS guests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      full_name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      attendance TEXT NOT NULL,
+      guest_count INTEGER DEFAULT 1,
+      song_request TEXT,
+      message TEXT,
+      plus_one_names TEXT,
+      food_allergies TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`
+  ).run();
 
-  db.serialize(() => {
-    db.run(
-      `CREATE TABLE IF NOT EXISTS guests (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        full_name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        attendance TEXT NOT NULL,
-        guest_count INTEGER DEFAULT 1,
-        song_request TEXT,
-        message TEXT,
-        plus_one_names TEXT,
-        food_allergies TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`
-    );
-
-    db.all("PRAGMA table_info(guests)", (err, rows) => {
-      if (err) {
-        console.warn("Could not inspect guests table", err);
-        return;
-      }
-      const hasPlusOne = rows.some((col) => col.name === "plus_one_names");
-      const hasAllergy = rows.some((col) => col.name === "food_allergies");
-      if (!hasPlusOne) {
-        db.run("ALTER TABLE guests ADD COLUMN plus_one_names TEXT", (alterErr) => {
-          if (alterErr) {
-            console.warn("Could not add plus_one_names column", alterErr);
-          }
-        });
-      }
-      if (!hasAllergy) {
-        db.run("ALTER TABLE guests ADD COLUMN food_allergies TEXT", (alterErr) => {
-          if (alterErr) {
-            console.warn("Could not add food_allergies column", alterErr);
-          }
-        });
-      }
-    });
-  });
-
-  function runAsync(query, params = []) {
-    return new Promise((resolve, reject) => {
-      db.run(query, params, function (err) {
-        if (err) return reject(err);
-        resolve({ id: this.lastID, changes: this.changes });
-      });
-    });
+  const columns = db.prepare("PRAGMA table_info(guests)").all();
+  const hasPlusOne = columns.some((col) => col.name === "plus_one_names");
+  const hasAllergy = columns.some((col) => col.name === "food_allergies");
+  if (!hasPlusOne) {
+    db.prepare("ALTER TABLE guests ADD COLUMN plus_one_names TEXT").run();
   }
+  if (!hasAllergy) {
+    db.prepare("ALTER TABLE guests ADD COLUMN food_allergies TEXT").run();
+  }
+
+  const insertStmt = db.prepare(
+    `INSERT INTO guests (full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies)
+     VALUES (@name, @email, @attendance, @guests, @song, @message, @plusOneNames, @allergies)`
+  );
+  const listStmt = db.prepare(
+    `SELECT id, full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies, created_at
+     FROM guests
+     ORDER BY created_at DESC`
+  );
 
   insertRsvp = async ({
     name,
@@ -133,35 +118,21 @@ if (client === "mysql" || client === "mariadb") {
     plusOneNames,
     allergies,
   }) => {
-    const result = await runAsync(
-      `INSERT INTO guests (full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        name,
-        email,
-        attendance,
-        guests,
-        song || null,
-        message || null,
-        plusOneNames || null,
-        allergies || null,
-      ]
-    );
-    return { id: result.id };
+    const result = insertStmt.run({
+      name,
+      email,
+      attendance,
+      guests,
+      song: song || null,
+      message: message || null,
+      plusOneNames: plusOneNames || null,
+      allergies: allergies || null,
+    });
+    return { id: result.lastInsertRowid };
   };
 
   listRsvps = async () => {
-    return new Promise((resolve, reject) => {
-      db.all(
-        `SELECT id, full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies, created_at
-         FROM guests
-         ORDER BY created_at DESC`,
-        (err, rows) => {
-          if (err) return reject(err);
-          resolve(rows);
-        }
-      );
-    });
+    return listStmt.all();
   };
 }
 

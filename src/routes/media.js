@@ -24,7 +24,11 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { files: 30 },
+});
+const uploadMany = upload.fields([{ name: "mediaFiles", maxCount: 10 }]);
 
 function unauthorized(res, message = "Unauthorized") {
   res.status(401).send(message);
@@ -80,19 +84,20 @@ router.post("/access", (req, res) => {
   res.redirect("/media");
 });
 
-router.post("/upload", hasMediaAccess, upload.array("mediaFiles", 10), async (req, res) => {
+router.post("/upload", hasMediaAccess, uploadMany, async (req, res) => {
   if (!isOpen()) {
     return res.status(403).json({ error: "Uploads open on wedding day." });
   }
 
-  if (!req.files || req.files.length === 0) {
+  const files = (req.files && req.files.mediaFiles) || [];
+  if (!files || files.length === 0) {
     return res.status(400).json({ error: "No files uploaded." });
   }
 
   const note = (req.body?.note || "").trim();
 
   const results = [];
-  for (const file of req.files) {
+  for (const file of files) {
     results.push({
       filename: file.filename,
       path: file.path,
