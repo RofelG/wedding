@@ -28,12 +28,11 @@ services:
       UPLOADS_DIR: ${UPLOADS_DIR:-/data/uploads}
     volumes:
       - app-data:/data
-    depends_on:
-      - db
 
   db:
     image: mariadb:11
     container_name: wedding-db
+    profiles: ["local-db"]
     restart: always
     environment:
       MARIADB_DATABASE: ${MYSQL_DATABASE:-wedding}
