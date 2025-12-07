@@ -1,4 +1,4 @@
-import { Router } from "express";
+import express, { Router } from "express";
 import fs from "fs";
 import path from "path";
 import multer from "multer";
@@ -15,6 +15,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 console.log(`Media uploads will be saved to: ${uploadsDir}`);
+const allowedExt = /\.(jpe?g|png|gif|webp|avif)$/i;
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadsDir),
@@ -58,6 +59,12 @@ router.use((req, res, next) => {
   next();
 });
 
+// Serve uploads directly (cached) so gallery can display them
+router.use(
+  "/uploads",
+  express.static(uploadsDir, { maxAge: "7d", fallthrough: true })
+);
+
 router.get("/", (req, res) => {
   const access = hasAccess(req);
   const open = isOpen();
@@ -66,6 +73,9 @@ router.get("/", (req, res) => {
     { href: "/rsvp", text: "RSVP" },
     { href: "/media", text: "Share Memories", active: true },
   ];
+  if (access && open) {
+    navLinks.push({ href: "/media/gallery", text: "Uploads" });
+  }
   res.render("media", {
     navLinks,
     hasAccess: access,
@@ -116,6 +126,70 @@ router.post("/upload", hasMediaAccess, uploadMany, async (req, res) => {
   }
 
   res.json({ ok: true, count: results.length, files: results });
+});
+
+router.get("/gallery", (req, res) => {
+  if (!hasAccess(req)) {
+    return unauthorized(res, "Access code required");
+  }
+  if (!isOpen()) {
+    return res
+      .status(403)
+      .send("Uploads will open on the wedding day. Please check back later.");
+  }
+  const navLinks = [
+    { href: "/", text: "Home" },
+    { href: "/rsvp", text: "RSVP" },
+    { href: "/media", text: "Share Memories" },
+    { href: "/media/gallery", text: "Uploads", active: true },
+  ];
+  res.render("media-gallery", { navLinks });
+});
+
+router.get("/api/uploads", hasMediaAccess, (req, res) => {
+  if (!isOpen()) {
+    return res.status(403).json({ error: "Uploads open on wedding day." });
+  }
+  const page = Math.max(1, parseInt(req.query.page || "1", 10));
+  const pageSize = Math.min(
+    50,
+    Math.max(5, parseInt(req.query.pageSize || "20", 10))
+  );
+
+  let files = [];
+  try {
+    files = fs
+      .readdirSync(uploadsDir)
+      .filter((name) => allowedExt.test(name))
+      .map((name) => {
+        const full = path.join(uploadsDir, name);
+        const stat = fs.statSync(full);
+        return { name, mtime: stat.mtimeMs, size: stat.size };
+      })
+      .sort((a, b) => b.mtime - a.mtime);
+  } catch (err) {
+    console.error("Failed to list uploads", err);
+    return res.status(500).json({ error: "Could not list uploads" });
+  }
+
+  const total = files.length;
+  const start = (page - 1) * pageSize;
+  const slice = files.slice(start, start + pageSize).map((f) => ({
+    name: f.name,
+    url: `/media/uploads/${encodeURIComponent(f.name)}`,
+    thumbUrl: `/media/uploads/${encodeURIComponent(f.name)}`,
+    size: f.size,
+    uploadedAt: f.mtime,
+  }));
+
+  res.json({
+    ok: true,
+    page,
+    pageSize,
+    total,
+    files: slice,
+    hasMore: start + pageSize < total,
+  });
 });
 
 function hasMediaAccess(req, res, next) {
