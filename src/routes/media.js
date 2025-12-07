@@ -14,6 +14,7 @@ const uploadsDir = process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads"
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
+console.log(`Media uploads will be saved to: ${uploadsDir}`);
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadsDir),
@@ -123,5 +124,14 @@ function hasMediaAccess(req, res, next) {
   }
   return next();
 }
+
+// Upload error handler to make failures visible in logs and responses
+router.use((err, _req, res, _next) => {
+  console.error("Media upload failed:", err);
+  const status = err instanceof multer.MulterError ? 400 : 500;
+  const message =
+    err instanceof multer.MulterError ? err.message : "Upload failed";
+  res.status(status).json({ error: message });
+});
 
 export default router;
