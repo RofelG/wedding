@@ -16,11 +16,14 @@ const logoBase = process.env.LOGO_BASE || "";
 const logoType = process.env.LOGO_TYPE || "";
 const publicDir = path.join(process.cwd(), "public");
 const viewsDir = path.join(process.cwd(), "src", "views");
+const trustProxy = process.env.TRUST_PROXY || "1";
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(publicDir));
+// Respect X-Forwarded-* headers when behind a proxy so rate limiting works
+app.set("trust proxy", trustProxy);
 
 app.set("view engine", "ejs");
 app.set("views", viewsDir);
