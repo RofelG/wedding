@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { files: 30 },
+  limits: { files: 30, fileSize: 10 * 1024 * 1024 },
 });
 const uploadMany = upload.fields([{ name: "mediaFiles", maxCount: 10 }]);
 
@@ -91,6 +91,7 @@ router.post("/upload", hasMediaAccess, uploadMany, async (req, res) => {
 
   const files = (req.files && req.files.mediaFiles) || [];
   if (!files || files.length === 0) {
+    console.warn("Media upload attempted with no files");
     return res.status(400).json({ error: "No files uploaded." });
   }
 
@@ -98,6 +99,7 @@ router.post("/upload", hasMediaAccess, uploadMany, async (req, res) => {
 
   const results = [];
   for (const file of files) {
+    console.log(`Saved upload: ${file.filename} -> ${file.path}`);
     results.push({
       filename: file.filename,
       path: file.path,
