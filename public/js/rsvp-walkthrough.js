@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var guestsInput = document.getElementById("guests");
   var attendanceInput = document.getElementById("attendance");
   var alertBox = document.getElementById("rsvpAlert");
+  var maxGuests = window.RSVP_MAX_GUESTS || 1;
 
   if (!form) return;
 
@@ -37,6 +38,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!guestDetailsList) return;
     guestDetailsList.innerHTML = "";
     var count = Number(guestsInput.value || 1);
+    if (count > maxGuests) {
+      count = maxGuests;
+      guestsInput.value = maxGuests;
+    }
     if (attendanceInput.value === "no") {
       count = 1;
       guestsInput.value = 1;
@@ -112,6 +117,11 @@ document.addEventListener("DOMContentLoaded", function () {
         showAlert("Guest count must be at least 1.");
         return false;
       }
+      if (guestsVal > maxGuests) {
+        guestsInput.value = maxGuests;
+        showAlert("Your invitation allows up to " + maxGuests + " guest(s).");
+        return false;
+      }
     } else if (index === 2) {
       var guestItems = guestDetailsList
         ? guestDetailsList.querySelectorAll(".guest-item[data-index]")
@@ -153,6 +163,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   attendanceInput.addEventListener("change", renderGuestDetails);
   guestsInput.addEventListener("input", renderGuestDetails);
+  if (guestsInput && maxGuests) {
+    guestsInput.max = maxGuests;
+  }
   renderGuestDetails();
   showStep(0);
 
