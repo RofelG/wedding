@@ -10,9 +10,8 @@ import mediaRouter from "./routes/media.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
-const accessCode = process.env.ACCESS_CODE || "LOVE2026";
-const accessCookie = "rsvp_auth";
 const capCookie = "rsvp_cap";
+const tokenSecret = process.env.ACCESS_CODE || "LOVE2026";
 const logoUrl = process.env.LOGO_URL || "";
 const logoBase = process.env.LOGO_BASE || "";
 const logoType = process.env.LOGO_TYPE || "";
@@ -38,14 +37,6 @@ app.get("/config.js", (_req, res) => {
     logoType: ${JSON.stringify(logoType)}
   };`);
 });
-
-function hasAccess(req) {
-  const cookie = req.headers.cookie || "";
-  return cookie
-    .split(";")
-    .map((c) => c.trim())
-    .some((c) => c.startsWith(`${accessCookie}=`));
-}
 
 function signCount(count, secret) {
   const sig = crypto.createHmac("sha256", secret).update(String(count)).digest("hex");
@@ -83,7 +74,7 @@ app.get("/rsvp", (req, res) => {
   const capFromCookie = getCapFromCookie(req);
   const maxGuests = capFromCookie;
 
-  if (!hasAccess(req) || !maxGuests) {
+  if (!maxGuests) {
     const navLinks = [
       { href: "/", text: "Home" },
       { href: "/rsvp", text: "RSVP", active: true },
@@ -102,7 +93,7 @@ app.get("/rsvp", (req, res) => {
 app.get("/rsvp/:code", (req, res) => {
   const code = (req.params.code || "").trim();
   const capToken = (req.query.v || "").toString().trim();
-  const capFromUrl = parseCapToken(capToken, code);
+  const capFromUrl = parseCapToken(capToken, tokenSecret);
   const capFromCookie = getCapFromCookie(req);
   const maxGuests = capFromUrl || capFromCookie;
 
@@ -119,18 +110,14 @@ app.get("/rsvp/:code", (req, res) => {
     return;
   }
 
-  if (!code || code !== accessCode) {
+  if (!code) {
     const navLinks = [
       { href: "/", text: "Home" },
       { href: "/rsvp", text: "RSVP", active: true },
     ];
-    accessGate(res, navLinks, "Incorrect code. Please try again.", capToken);
+    accessGate(res, navLinks, "Incorrect link. Please try again.", capToken);
     return;
   }
-  res.setHeader(
-    "Set-Cookie",
-    `${accessCookie}=1; HttpOnly; Path=/; SameSite=Lax; Max-Age=${60 * 60 * 24}`
-  );
   if (capFromUrl) {
     res.setHeader(
       "Set-Cookie",
@@ -141,9 +128,8 @@ app.get("/rsvp/:code", (req, res) => {
 });
 
 app.post("/rsvp/access", (req, res) => {
-  const code = (req.body?.code || "").trim();
   const capToken = (req.query.v || "").toString().trim();
-  const capFromUrl = parseCapToken(capToken, accessCode);
+  const capFromUrl = parseCapToken(capToken, tokenSecret);
   const capFromCookie = getCapFromCookie(req);
   const maxGuests = capFromUrl || capFromCookie;
 
@@ -160,26 +146,13 @@ app.post("/rsvp/access", (req, res) => {
     return;
   }
 
-  if (!code || code !== accessCode) {
-    const navLinks = [
-      { href: "/", text: "Home" },
-      { href: "/rsvp", text: "RSVP", active: true },
-    ];
-    accessGate(res, navLinks, "Incorrect code. Please try again.", capToken);
-    return;
-  }
-  res.setHeader(
-    "Set-Cookie",
-    `${accessCookie}=1; HttpOnly; Path=/; SameSite=Lax; Max-Age=${60 * 60 * 24}`
-  );
   if (capFromUrl) {
     res.setHeader(
       "Set-Cookie",
       `${capCookie}=${capToken}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${60 * 60 * 24}`
     );
   }
-  const capQuery = capFromUrl ? `?cap=${capToken}` : "";
-  res.redirect(`/rsvp${capQuery}`);
+  res.redirect("/rsvp");
 });
 
 app.get("/", (_req, res) => {
@@ -212,7 +185,7 @@ app.listen(port, () => {
   console.log(`Wedding site running on http://localhost:${port}`);
   // Log sample RSVP links for counts 1-4
   [1, 2, 3, 4].forEach((count) => {
-    const token = signCount(count, accessCode);
-    console.log(`Invite (max ${count}): /rsvp/${accessCode}?v=${token}`);
+    const token = signCount(count, tokenSecret);
+    console.log(`Invite (max ${count}): /rsvp/${tokenSecret}?v=${token}`);
   });
 });

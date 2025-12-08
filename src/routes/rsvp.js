@@ -3,7 +3,6 @@ import rateLimit from "express-rate-limit";
 import db from "../db/index.js";
 
 const router = Router();
-const ACCESS_COOKIE = process.env.ACCESS_COOKIE || "rsvp_auth";
 const ACCESS_CODE = process.env.ACCESS_CODE;
 const CAP_COOKIE = "rsvp_cap";
 
@@ -18,12 +17,6 @@ router.use(limiter);
 
 router.use((req, res, next) => {
   const cookie = req.headers.cookie || "";
-  const hasCookie = cookie
-    .split(";")
-    .map((c) => c.trim())
-    .some((c) => c.startsWith(`${ACCESS_COOKIE}=`));
-  const headerCode = req.headers["x-access-code"];
-  const hasHeaderAccess = ACCESS_CODE && headerCode === ACCESS_CODE;
   const capToken = cookie
     .split(";")
     .map((c) => c.trim())
@@ -37,9 +30,6 @@ router.use((req, res, next) => {
     return count;
   })();
 
-  if (!hasCookie && !hasHeaderAccess) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
   if (!capValue) {
     return res.status(401).json({ error: "Missing or invalid invitation link" });
   }
