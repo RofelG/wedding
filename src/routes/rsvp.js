@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
   const {
     name,
     email,
-    guests = 1,
+    guests = 0,
     attendance,
     song,
     message,
@@ -56,8 +56,8 @@ router.post("/", async (req, res) => {
   }
 
   const guestCount = Number.parseInt(guests, 10);
-  if (Number.isNaN(guestCount) || guestCount < 1) {
-    return res.status(400).json({ error: "guests must be a positive number" });
+  if (Number.isNaN(guestCount) || guestCount < 0) {
+    return res.status(400).json({ error: "guests must be zero or a positive number" });
   }
   if (req.maxGuests && guestCount > req.maxGuests) {
     return res
@@ -67,27 +67,30 @@ router.post("/", async (req, res) => {
 
   // Validate per-guest details when provided
   let perGuestDetails = [];
-  if (Array.isArray(guestDetails)) {
-    perGuestDetails = guestDetails.map((g) => ({
-      name: (g?.name || "").trim(),
-      allergies: g?.allergies ? String(g.allergies).trim() : "",
-    }));
-  }
+  if (guestCount > 0) {
+    if (Array.isArray(guestDetails)) {
+      perGuestDetails = guestDetails.map((g) => ({
+        name: (g?.name || "").trim(),
+        allergies: g?.allergies ? String(g.allergies).trim() : "",
+      }));
+    }
 
-  if (perGuestDetails.length !== guestCount) {
-    return res.status(400).json({
-      error: "Guest details are incomplete. Please provide names for each guest.",
-    });
-  }
+    if (perGuestDetails.length !== guestCount) {
+      return res.status(400).json({
+        error: "Guest details are incomplete. Please provide names for each guest.",
+      });
+    }
 
-  const missingNames = perGuestDetails.some((g) => !g.name);
-  if (missingNames) {
-    return res.status(400).json({ error: "Each guest needs a name." });
+    const missingNames = perGuestDetails.some((g) => !g.name);
+    if (missingNames) {
+      return res.status(400).json({ error: "Each guest needs a name." });
+    }
   }
 
   try {
-    const additionalNames = perGuestDetails.slice(1).map((g) => g.name).join(", ");
-    const allergiesJson = JSON.stringify(perGuestDetails);
+    const additionalNames =
+      perGuestDetails.length > 1 ? perGuestDetails.slice(1).map((g) => g.name).join(", ") : null;
+    const allergiesJson = guestCount > 0 ? JSON.stringify(perGuestDetails) : null;
 
     const result = await db.insertRsvp({
       name: name.trim(),

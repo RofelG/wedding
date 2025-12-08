@@ -107,7 +107,7 @@ if (form && alertBox) {
         syncInput();
     } catch (err) {
         console.error('upload error', err);
-        alertBox.classList.add('alert-danger');
+        alertBox.classList.add('alert-danger', 'mt-3');
         alertBox.textContent = err.message;
         alertBox.style.display = 'block';
     }
