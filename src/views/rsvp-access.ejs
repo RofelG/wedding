@@ -40,7 +40,7 @@
       <% if (message) { %>
         <div class="alert alert-danger py-2 mb-3" role="alert"><%= message %></div>
       <% } %>
-      <form method="POST" action="/rsvp/access" class="d-grid gap-3">
+      <form method="POST" action="/rsvp/access<%= capToken ? ('?v=' + encodeURIComponent(capToken)) : '' %>" class="d-grid gap-3">
         <div>
           <label for="code" class="form-label text-muted small">Access Code</label>
           <div class="position-relative">
