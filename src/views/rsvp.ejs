@@ -85,14 +85,13 @@
                   <select class="form-select" id="attendance" required>
                     <option value="" selected disabled>Select an option</option>
                     <option value="yes">Yes! I’ll be there 🎉</option>
-                    <option value="maybe">Not sure yet, but trying!</option>
                     <option value="no">I can’t make it 😔</option>
                   </select>
                 </div>
                 <div class="mb-3">
                   <label for="guests" class="form-label">Number of Guests (including you) *</label>
-                  <input type="number" class="form-control" id="guests" min="1" max="<%= maxGuests %>" value="1" required />
-                  <div class="form-text">Your invitation allows up to <%= maxGuests %> guest(s). If they can't attend, leave this as 1.</div>
+                  <input type="number" class="form-control" id="guests" min="0" max="<%= maxGuests %>" value="1" required />
+                  <div class="form-text">Your invitation allows up to <%= maxGuests %> guest(s). Select 0 if you can’t make it.</div>
                 </div>
               </div>
 

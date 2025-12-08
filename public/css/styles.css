@@ -1,7 +1,7 @@
 :root {
-  --wedding-primary: #ff6f91; /* fun pink */
-  --wedding-secondary: #ffb6c1;
-  --wedding-accent: #ffe5ec;
+  --wedding-primary: #ca6641;
+  --wedding-secondary: #ff855c;
+  --wedding-accent: #f7e7ce;
   --wedding-dark: #343a40;
 }
 
@@ -387,8 +387,8 @@ section {
 }
 
 .btn-wedding-primary:hover {
-  background: #ff4f7b;
-  border-color: #ff4f7b;
+  background: var(--wedding-secondary);
+  border-color: var(--wedding-secondary);
   color: #ffffff;
 }
 
@@ -530,9 +530,9 @@ footer {
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --wedding-primary: #ff9fbd;
-    --wedding-secondary: #ffa6c5;
-    --wedding-accent: #2a2f3a;
+    --wedding-primary: #ff855c;
+    --wedding-secondary: #f7e7ce;
+    --wedding-accent: #ca6641;
     --wedding-dark: #f2f2f2;
   }
   body {
@@ -584,7 +584,7 @@ footer {
   .hero-subtitle {
     color: #cdd2dd;
   }
-  .hero-chip {
+  .hero-chip, .rsvp-hero .hero-chip, .step-pill {
     background: rgba(255, 159, 189, 0.18);
     color: var(--wedding-primary);
   }
@@ -601,8 +601,19 @@ footer {
   .hero-scroll {
     color: #e6e6e6;
   }
+  .detail-icon {
+    color: var(--wedding-dark);
+  }
+  .btn-wedding-primary:hover {
+    background: var(--wedding-secondary);
+    border-color: var(--wedding-secondary);
+    color: #343a40;
+  }
   #rsvp {
     background: linear-gradient(135deg, rgba(255, 159, 189, 0.28), rgba(15, 17, 22, 0.92));
+  }
+  .form-text {
+    color: #9aa0ad;
   }
   footer {
     background: #0f1116;

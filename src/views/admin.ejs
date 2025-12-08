@@ -25,7 +25,10 @@
         <p class="text-uppercase text-muted small mb-1">RSVP Dashboard</p>
         <h1 class="h4 mb-0">RSVP Admin</h1>
       </div>
-      <span class="pill text-muted">Protected</span>
+      <div class="d-flex gap-2">
+        <span class="pill text-muted">Protected</span>
+        <span class="pill" id="guestCountPill">Total: —</span>
+      </div>
     </div>
     <div id="status" class="alert alert-info">Loading responses…</div>
     <div class="card">
@@ -82,6 +85,12 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to load");
         status.className = "visually-hidden";
+        if (data.totals && typeof data.totals.total !== "undefined") {
+          const pill = document.getElementById("guestCountPill");
+          if (pill) {
+            pill.textContent = `Expected: ${data.totals.yes || 0} (Yes) / ${data.totals.total || 0} (All)`;
+          }
+        }
         const tbody = document.querySelector("#rsvpTable tbody");
         tbody.innerHTML = "";
         data.rows.forEach((row) => {
@@ -101,7 +110,7 @@
           tbody.appendChild(tr);
         });
       } catch (err) {
-        status.className = "alert alert-danger";
+        status.className = "alert alert-danger mt-3";
         status.textContent = err.message;
       }
     }

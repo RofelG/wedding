@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var attendanceInput = document.getElementById("attendance");
   var alertBox = document.getElementById("rsvpAlert");
   var maxGuests = window.RSVP_MAX_GUESTS || 1;
+  var skipGuests = false;
 
   if (!form) return;
 
@@ -37,29 +38,39 @@ document.addEventListener("DOMContentLoaded", function () {
   function renderGuestDetails() {
     if (!guestDetailsList) return;
     guestDetailsList.innerHTML = "";
+    var attendanceVal = attendanceInput.value;
     var count = Number(guestsInput.value || 1);
-    if (count > maxGuests) {
-      count = maxGuests;
-      guestsInput.value = maxGuests;
-    }
-    if (attendanceInput.value === "no") {
-      count = 1;
-      guestsInput.value = 1;
+    if (attendanceVal === "no") {
+      skipGuests = true;
+      count = 0;
+      guestsInput.value = 0;
+    } else {
+      skipGuests = false;
+      if (count > maxGuests) {
+        count = maxGuests;
+        guestsInput.value = maxGuests;
+      }
+      if (count < 1) {
+        count = 1;
+        guestsInput.value = 1;
+      }
     }
 
-    // Primary guest (the person filling the form)
-    var primaryWrapper = document.createElement("div");
-    primaryWrapper.className = "guest-item";
-    var primaryLabel = document.createElement("label");
-    primaryLabel.className = "form-label";
-    primaryLabel.textContent = "Your food allergies or dietary needs (optional)";
-    var primaryInput = document.createElement("input");
-    primaryInput.type = "text";
-    primaryInput.className = "form-control guest-allergies";
-    primaryInput.id = "primaryAllergies";
-    primaryWrapper.appendChild(primaryLabel);
-    primaryWrapper.appendChild(primaryInput);
-    guestDetailsList.appendChild(primaryWrapper);
+    if (count > 0) {
+      // Primary guest (the person filling the form)
+      var primaryWrapper = document.createElement("div");
+      primaryWrapper.className = "guest-item";
+      var primaryLabel = document.createElement("label");
+      primaryLabel.className = "form-label";
+      primaryLabel.textContent = "Your food allergies or dietary needs (optional)";
+      var primaryInput = document.createElement("input");
+      primaryInput.type = "text";
+      primaryInput.className = "form-control guest-allergies";
+      primaryInput.id = "primaryAllergies";
+      primaryWrapper.appendChild(primaryLabel);
+      primaryWrapper.appendChild(primaryInput);
+      guestDetailsList.appendChild(primaryWrapper);
+    }
 
     for (var i = 2; i <= count; i++) {
       var guestWrapper = document.createElement("div");
@@ -111,18 +122,20 @@ document.addEventListener("DOMContentLoaded", function () {
         return false;
       }
       if (attendance === "no") {
-        guestsInput.value = 1;
-      }
-      if (Number.isNaN(guestsVal) || guestsVal < 1) {
-        showAlert("Guest count must be at least 1.");
-        return false;
-      }
-      if (guestsVal > maxGuests) {
-        guestsInput.value = maxGuests;
-        showAlert("Your invitation allows up to " + maxGuests + " guest(s).");
-        return false;
+        guestsInput.value = 0;
+      } else {
+        if (Number.isNaN(guestsVal) || guestsVal < 1) {
+          showAlert("Guest count must be at least 1.");
+          return false;
+        }
+        if (guestsVal > maxGuests) {
+          guestsInput.value = maxGuests;
+          showAlert("Your invitation allows up to " + maxGuests + " guest(s).");
+          return false;
+        }
       }
     } else if (index === 2) {
+      if (skipGuests) return true;
       var guestItems = guestDetailsList
         ? guestDetailsList.querySelectorAll(".guest-item[data-index]")
         : [];
@@ -140,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function showAlert(message, type) {
     if (!alertBox) return;
-    alertBox.className = "alert alert-" + (type || "danger");
+    alertBox.className = "alert alert-" + (type || "danger") + " mt-3";
     alertBox.textContent = message;
     alertBox.style.display = "block";
   }
@@ -151,13 +164,21 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     if (currentStep < steps.length - 1) {
-      showStep(currentStep + 1);
+      var target = currentStep + 1;
+      if (skipGuests && target === 2) {
+        target = 3;
+      }
+      showStep(target);
     }
   });
 
   prevBtn.addEventListener("click", function () {
     if (currentStep > 0) {
-      showStep(currentStep - 1);
+      var target = currentStep - 1;
+      if (skipGuests && currentStep === 3 && target === 2) {
+        target = 1;
+      }
+      showStep(target);
     }
   });
 
@@ -165,6 +186,7 @@ document.addEventListener("DOMContentLoaded", function () {
   guestsInput.addEventListener("input", renderGuestDetails);
   if (guestsInput && maxGuests) {
     guestsInput.max = maxGuests;
+    guestsInput.min = 0;
   }
   renderGuestDetails();
   showStep(0);
@@ -186,28 +208,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var name = document.getElementById("name").value.trim();
     var email = document.getElementById("email").value.trim();
-    var guests = Number(guestsInput.value || 1);
+    var guests = Number(guestsInput.value || 0);
     var attendance = attendanceInput.value;
     var song = document.getElementById("song").value.trim();
     var message = document.getElementById("message").value.trim();
 
     var guestDetails = [];
-    var primaryAllergiesInput = document.getElementById("primaryAllergies");
-    guestDetails.push({
-      name: name,
-      allergies: primaryAllergiesInput ? primaryAllergiesInput.value.trim() : "",
-    });
-    var guestItems = guestDetailsList
-      ? guestDetailsList.querySelectorAll(".guest-item[data-index]")
-      : [];
-    guestItems.forEach(function (guestItem) {
-      var guestNameInput = guestItem.querySelector(".guest-name");
-      var guestAllergyInput = guestItem.querySelector(".guest-allergies");
+    if (guests > 0) {
+      var primaryAllergiesInput = document.getElementById("primaryAllergies");
       guestDetails.push({
-        name: guestNameInput ? guestNameInput.value.trim() : "",
-        allergies: guestAllergyInput ? guestAllergyInput.value.trim() : "",
+        name: name,
+        allergies: primaryAllergiesInput ? primaryAllergiesInput.value.trim() : "",
       });
-    });
+      var guestItems = guestDetailsList
+        ? guestDetailsList.querySelectorAll(".guest-item[data-index]")
+        : [];
+      guestItems.forEach(function (guestItem) {
+        var guestNameInput = guestItem.querySelector(".guest-name");
+        var guestAllergyInput = guestItem.querySelector(".guest-allergies");
+        guestDetails.push({
+          name: guestNameInput ? guestNameInput.value.trim() : "",
+          allergies: guestAllergyInput ? guestAllergyInput.value.trim() : "",
+        });
+      });
+    }
 
     try {
       var res = await fetch("/api/rsvp", {

@@ -91,7 +91,21 @@ router.get("/data", checkAuth, async (_req, res) => {
           })()
         : [],
     }));
-    res.json({ ok: true, rows: mapped });
+    const totals = mapped.reduce(
+      (acc, row) => {
+        const count = Number.parseInt(row.guest_count, 10) || 0;
+        acc.total += count;
+        if ((row.attendance || "").toLowerCase() === "yes") {
+          acc.yes += count;
+        }
+        if ((row.attendance || "").toLowerCase() === "maybe") {
+          acc.maybe += count;
+        }
+        return acc;
+      },
+      { total: 0, yes: 0, maybe: 0 }
+    );
+    res.json({ ok: true, rows: mapped, totals });
   } catch (err) {
     console.error("Admin data fetch failed", err);
     res.status(500).json({ error: "Failed to fetch RSVPs" });

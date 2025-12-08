@@ -200,7 +200,7 @@ document.addEventListener("click", function (e) {
       var guestAllergy = guestAllergyInput ? guestAllergyInput.value.trim() : "";
 
       if (!guestName) {
-        alertBox.className = "alert alert-danger";
+        alertBox.className = "alert alert-danger mt-3";
         alertBox.textContent = "Please provide the name for guest " + guestItem.dataset.index + ".";
         alertBox.style.display = "block";
         return;
@@ -241,12 +241,12 @@ document.addEventListener("click", function (e) {
         successMsg = "Thanks for letting us know, " + name + ". We'll miss you.";
       }
 
-      alertBox.className = "alert alert-success";
+      alertBox.className = "alert alert-success mt-3";
       alertBox.textContent = successMsg;
       alertBox.style.display = "block";
       form.reset();
     } catch (err) {
-      alertBox.className = "alert alert-danger";
+      alertBox.className = "alert alert-danger mt-3";
       alertBox.textContent = err.message;
       alertBox.style.display = "block";
     }
