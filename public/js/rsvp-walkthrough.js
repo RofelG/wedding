@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded", function () {
   var alertBox = document.getElementById("rsvpAlert");
   var maxGuests = window.RSVP_MAX_GUESTS || 1;
   var skipGuests = false;
+  var redirectTimer;
+  var isLocked = false;
 
   if (!form) return;
 
@@ -25,6 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function showStep(index) {
+    if (isLocked) return;
     steps.forEach(function (step, i) {
       step.classList.toggle("d-none", i !== index);
     });
@@ -36,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function renderGuestDetails() {
+    if (isLocked) return;
     if (!guestDetailsList) return;
     guestDetailsList.innerHTML = "";
     var attendanceVal = attendanceInput.value;
@@ -153,12 +157,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function showAlert(message, type) {
     if (!alertBox) return;
+    if (redirectTimer) {
+      clearTimeout(redirectTimer);
+      redirectTimer = null;
+    }
     alertBox.className = "alert alert-" + (type || "danger") + " mt-3";
     alertBox.textContent = message;
     alertBox.style.display = "block";
   }
 
+  function lockForm() {
+    isLocked = true;
+    Array.from(form.elements).forEach(function (el) {
+      el.disabled = true;
+    });
+  }
+
   nextBtn.addEventListener("click", function () {
+    if (isLocked) return;
     if (!validateStep(currentStep)) {
       showStep(currentStep);
       return;
@@ -173,6 +189,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   prevBtn.addEventListener("click", function () {
+    if (isLocked) return;
     if (currentStep > 0) {
       var target = currentStep - 1;
       if (skipGuests && currentStep === 3 && target === 2) {
@@ -193,6 +210,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
+    if (isLocked) return;
     if (!validateStep(0)) {
       showStep(0);
       return;
@@ -255,6 +273,10 @@ document.addEventListener("DOMContentLoaded", function () {
       form.reset();
       renderGuestDetails();
       showStep(0);
+      lockForm();
+      redirectTimer = setTimeout(function () {
+        window.location.href = "/";
+      }, 2500);
     } catch (err) {
       showAlert(err.message);
     }
