@@ -112,4 +112,18 @@ router.get("/data", checkAuth, async (_req, res) => {
   }
 });
 
+router.delete("/rsvp/:id", checkAuth, async (req, res) => {
+  const id = Number.parseInt(req.params.id, 10);
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ error: "Invalid RSVP id" });
+  }
+  try {
+    await db.deleteRsvp(id);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Admin delete failed", err);
+    res.status(500).json({ error: "Failed to delete RSVP" });
+  }
+});
+
 export default router;

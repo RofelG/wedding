@@ -5,6 +5,7 @@ const client = (process.env.DB_CLIENT || "sqlite").toLowerCase();
 
 let insertRsvp;
 let listRsvps;
+let deleteRsvp;
 
 if (client === "mysql" || client === "mariadb") {
 
@@ -69,6 +70,10 @@ if (client === "mysql" || client === "mariadb") {
     );
     return rows;
   };
+
+  deleteRsvp = async (id) => {
+    await pool.query("DELETE FROM guests WHERE id = ?", [id]);
+  };
 } else {
   const dbPath = process.env.DB_PATH || path.join(process.cwd(), "wedding.db");
   const db = new Database(dbPath);
@@ -107,6 +112,7 @@ if (client === "mysql" || client === "mariadb") {
      FROM guests
      ORDER BY created_at DESC`
   );
+  const deleteStmt = db.prepare("DELETE FROM guests WHERE id = ?");
 
   insertRsvp = async ({
     name,
@@ -134,6 +140,10 @@ if (client === "mysql" || client === "mariadb") {
   listRsvps = async () => {
     return listStmt.all();
   };
+
+  deleteRsvp = async (id) => {
+    deleteStmt.run(id);
+  };
 }
 
-export default { insertRsvp, listRsvps };
+export default { insertRsvp, listRsvps, deleteRsvp };

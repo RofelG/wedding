@@ -47,6 +47,7 @@
                 <th>Song</th>
                 <th>Message</th>
                 <th>Created</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -80,6 +81,8 @@
 
     async function loadData() {
       const status = document.getElementById("status");
+      status.className = "alert alert-info";
+      status.textContent = "Loading responses…";
       try {
         const res = await fetch("/admin/data");
         const data = await res.json();
@@ -106,6 +109,7 @@
             <td>${row.song_request || ""}</td>
             <td>${row.message || ""}</td>
             <td>${row.created_at || ""}</td>
+            <td><button class="btn btn-sm btn-outline-danger delete-btn" data-id="${row.id}">Delete</button></td>
           `;
           tbody.appendChild(tr);
         });
@@ -114,6 +118,31 @@
         status.textContent = err.message;
       }
     }
+
+    async function deleteRsvp(id) {
+      const status = document.getElementById("status");
+      try {
+        const res = await fetch(`/admin/rsvp/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Delete failed");
+        status.className = "alert alert-success mt-3";
+        status.textContent = "RSVP deleted.";
+        await loadData();
+      } catch (err) {
+        status.className = "alert alert-danger mt-3";
+        status.textContent = err.message;
+      }
+    }
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".delete-btn");
+      if (!btn) return;
+      const id = btn.getAttribute("data-id");
+      if (!id) return;
+      const confirmed = window.confirm("Delete this RSVP? This cannot be undone.");
+      if (!confirmed) return;
+      deleteRsvp(id);
+    });
 
     loadData();
   </script>
