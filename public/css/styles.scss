@@ -353,6 +353,34 @@ section {
     margin-bottom: 0.9rem;
 }
 
+.color {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-right: 0.4rem;
+    &:nth-child(1) {
+        background: #000080;
+    }
+    &:nth-child(2) {
+        background: #730b08;
+    }
+    &:nth-child(3) {
+        background: #b2ac88;
+    }
+    &:nth-child(4) {
+        background: #ca6641;
+    }
+    &:nth-child(5) {
+        background: #f7e7ce;
+    }
+    &:nth-child(6) {
+        background: #ff855c;
+    }
+}
+
 /* Gallery */
 .gallery-img {
     border-radius: 1rem;
