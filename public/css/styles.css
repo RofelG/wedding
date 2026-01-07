@@ -218,7 +218,7 @@
 
 .hero-scroll {
   position: absolute;
-  bottom: 1.75rem;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.8rem;
