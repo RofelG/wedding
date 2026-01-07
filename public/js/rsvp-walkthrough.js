@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", function () {
   var guestDetailsList = document.getElementById("guestDetailsList");
   var guestsInput = document.getElementById("guests");
   var attendanceInput = document.getElementById("attendance");
+  var roomNeededInput = document.getElementById("roomNeeded");
+  var roomCountInput = document.getElementById("roomCount");
   var alertBox = document.getElementById("rsvpAlert");
   var maxGuests = window.RSVP_MAX_GUESTS || 1;
   var skipGuests = false;
@@ -38,6 +40,24 @@ document.addEventListener("DOMContentLoaded", function () {
     updateProgress();
   }
 
+  function toggleRoomFields(attendanceVal, guestCount) {
+    if (!roomNeededInput || !roomCountInput) return;
+    var notAttending = attendanceVal === "no";
+    roomNeededInput.disabled = notAttending;
+    if (notAttending) {
+      roomNeededInput.value = "no";
+      roomCountInput.value = 0;
+    }
+    var needsRoom = roomNeededInput.value === "yes" && !roomNeededInput.disabled;
+    roomCountInput.disabled = !needsRoom;
+    roomCountInput.max = guestCount;
+    if (!needsRoom) {
+      roomCountInput.value = 0;
+    } else if (!roomCountInput.value || Number(roomCountInput.value) < 1) {
+      roomCountInput.value = guestCount;
+    }
+  }
+
   function renderGuestDetails() {
     if (isLocked) return;
     if (!guestDetailsList) return;
@@ -59,6 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
         guestsInput.value = 1;
       }
     }
+    toggleRoomFields(attendanceVal, count || 0);
 
     if (count > 0) {
       // Primary guest (the person filling the form)
@@ -138,6 +159,29 @@ document.addEventListener("DOMContentLoaded", function () {
           return false;
         }
       }
+      if (roomNeededInput) {
+        var needsRoom = roomNeededInput.value;
+        var roomCount = Number(roomCountInput ? roomCountInput.value || 0 : 0);
+        if (!needsRoom) {
+          showAlert("Please let us know if you need a room.");
+          return false;
+        }
+        if (attendance === "no") {
+          if (roomCountInput) roomCountInput.value = 0;
+        } else if (needsRoom === "yes") {
+          if (Number.isNaN(roomCount) || roomCount < 1) {
+            showAlert("Tell us how many people need a room (at least 1).");
+            return false;
+          }
+          if (!Number.isNaN(guestsVal) && roomCount > guestsVal) {
+            roomCountInput.value = guestsVal;
+            showAlert("Room count can’t be higher than your guest count.");
+            return false;
+          }
+        } else {
+          if (roomCountInput) roomCountInput.value = 0;
+        }
+      }
     } else if (index === 2) {
       if (skipGuests) return true;
       var guestItems = guestDetailsList
@@ -201,6 +245,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   attendanceInput.addEventListener("change", renderGuestDetails);
   guestsInput.addEventListener("input", renderGuestDetails);
+  if (roomNeededInput) {
+    roomNeededInput.addEventListener("change", function () {
+      var guestCount = Number(guestsInput.value || 0);
+      toggleRoomFields(attendanceInput.value, guestCount);
+    });
+  }
   if (guestsInput && maxGuests) {
     guestsInput.max = maxGuests;
     guestsInput.min = 0;
@@ -230,6 +280,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var attendance = attendanceInput.value;
     var song = document.getElementById("song").value.trim();
     var message = document.getElementById("message").value.trim();
+    var roomNeeded = roomNeededInput ? roomNeededInput.value : "no";
+    var roomCount = Number(roomCountInput ? roomCountInput.value || 0 : 0);
 
     var guestDetails = [];
     if (guests > 0) {
@@ -260,6 +312,8 @@ document.addEventListener("DOMContentLoaded", function () {
           email,
           guests,
           attendance,
+          roomNeeded,
+          roomCount,
           song,
           message,
           guestDetails,

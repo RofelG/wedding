@@ -81,6 +81,8 @@ router.get("/data", checkAuth, async (_req, res) => {
     const rows = await db.listRsvps();
     const mapped = rows.map((row) => ({
       ...row,
+      needs_room: row.needs_room ? Boolean(Number(row.needs_room)) : false,
+      room_count: Number.parseInt(row.room_count, 10) || 0,
       food_allergies: row.food_allergies
         ? (() => {
             try {

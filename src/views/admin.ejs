@@ -42,6 +42,8 @@
                 <th>Email</th>
                 <th>Attendance</th>
                 <th>Guests</th>
+                <th>Room</th>
+                <th>Room Count</th>
                 <th>Plus Ones</th>
                 <th>Allergies</th>
                 <th>Song</th>
@@ -69,6 +71,14 @@
 
     function fmtPlusNames(row) {
       return row.plus_one_names || "";
+    }
+
+    function fmtRoom(row) {
+      return row.needs_room ? "Yes" : "No";
+    }
+
+    function fmtRoomCount(row) {
+      return row.needs_room ? (row.room_count || 0) : 0;
     }
 
     function fmtAllergies(row) {
@@ -104,6 +114,8 @@
             <td>${row.email}</td>
             <td>${badge(row.attendance)}</td>
             <td>${row.guest_count}</td>
+            <td>${fmtRoom(row)}</td>
+            <td>${fmtRoomCount(row)}</td>
             <td>${fmtPlusNames(row)}</td>
             <td>${fmtAllergies(row)}</td>
             <td>${row.song_request || ""}</td>

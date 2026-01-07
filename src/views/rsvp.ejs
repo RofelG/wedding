@@ -93,6 +93,20 @@
                   <input type="number" class="form-control" id="guests" min="0" max="<%= maxGuests %>" value="1" required />
                   <div class="form-text">Your invitation allows up to <%= maxGuests %> guest(s). Select 0 if you can’t make it.</div>
                 </div>
+                <div class="mb-3">
+                  <label class="form-label">Do you need a room at the venue? *</label>
+                  <select class="form-select" id="roomNeeded" required>
+                    <option value="" selected disabled>Select an option</option>
+                    <option value="yes">Yes, please reserve a room</option>
+                    <option value="no">No, we don’t need a room</option>
+                  </select>
+                  <div class="form-text">Rooms will be 1000 PHP or $25 for the night.</div>
+                </div>
+                <div class="mb-3">
+                  <label for="roomCount" class="form-label">How many people need a room?</label>
+                  <input type="number" class="form-control" id="roomCount" min="0" value="0" />
+                  <div class="form-text">Use the total number of people you’d like us to house (often matches your guest count).</div>
+                </div>
               </div>
 
               <div class="rsvp-step d-none" data-step="3">

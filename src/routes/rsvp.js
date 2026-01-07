@@ -46,6 +46,8 @@ router.post("/", async (req, res) => {
     email,
     guests = 0,
     attendance,
+    roomNeeded,
+    roomCount,
     song,
     message,
     guestDetails,
@@ -63,6 +65,21 @@ router.post("/", async (req, res) => {
     return res
       .status(400)
       .json({ error: `Your invitation allows up to ${req.maxGuests} guest(s).` });
+  }
+
+  const wantsRoom = (roomNeeded || "").toString().toLowerCase() === "yes";
+  const roomCountNum = Number.parseInt(roomCount, 10) || 0;
+  let normalizedRoomCount = wantsRoom ? roomCountNum : 0;
+  const normalizedRoomNeeded = attendance === "no" ? false : wantsRoom;
+  if (attendance === "no") {
+    normalizedRoomCount = 0;
+  } else if (wantsRoom) {
+    if (roomCountNum < 1) {
+      return res.status(400).json({ error: "Tell us how many people need a room." });
+    }
+    if (guestCount > 0 && roomCountNum > guestCount) {
+      return res.status(400).json({ error: "Room count cannot be higher than your guest count." });
+    }
   }
 
   // Validate per-guest details when provided
@@ -101,6 +118,8 @@ router.post("/", async (req, res) => {
       message,
       plusOneNames: additionalNames || null,
       allergies: allergiesJson,
+      roomNeeded: normalizedRoomNeeded,
+      roomCount: normalizedRoomCount,
     });
     res.json({ ok: true, id: result.id });
   } catch (err) {
