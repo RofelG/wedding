@@ -6,6 +6,7 @@ const client = (process.env.DB_CLIENT || "sqlite").toLowerCase();
 let insertRsvp;
 let listRsvps;
 let deleteRsvp;
+let updateRsvp;
 
 if (client === "mysql" || client === "mariadb") {
 
@@ -89,6 +90,39 @@ if (client === "mysql" || client === "mariadb") {
       "SELECT id, full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies, needs_room, room_count, created_at FROM guests ORDER BY created_at DESC"
     );
     return rows;
+  };
+
+  updateRsvp = async (id, payload) => {
+    const {
+      name,
+      email,
+      attendance,
+      guests,
+      song,
+      message,
+      plusOneNames,
+      allergies,
+      roomNeeded,
+      roomCount,
+    } = payload;
+    await pool.query(
+      `UPDATE guests
+       SET full_name = ?, email = ?, attendance = ?, guest_count = ?, song_request = ?, message = ?, plus_one_names = ?, food_allergies = ?, needs_room = ?, room_count = ?
+       WHERE id = ?`,
+      [
+        name,
+        email,
+        attendance,
+        guests,
+        song || null,
+        message || null,
+        plusOneNames || null,
+        allergies || null,
+        roomNeeded ? 1 : 0,
+        roomCount || 0,
+        id,
+      ]
+    );
   };
 
   deleteRsvp = async (id) => {
@@ -178,6 +212,47 @@ if (client === "mysql" || client === "mariadb") {
   deleteRsvp = async (id) => {
     deleteStmt.run(id);
   };
+
+  updateRsvp = async (id, payload) => {
+    const {
+      name,
+      email,
+      attendance,
+      guests,
+      song,
+      message,
+      plusOneNames,
+      allergies,
+      roomNeeded,
+      roomCount,
+    } = payload;
+    db.prepare(
+      `UPDATE guests
+       SET full_name = @name,
+           email = @email,
+           attendance = @attendance,
+           guest_count = @guests,
+           song_request = @song,
+           message = @message,
+           plus_one_names = @plusOneNames,
+           food_allergies = @allergies,
+           needs_room = @roomNeeded,
+           room_count = @roomCount
+       WHERE id = @id`
+    ).run({
+      id,
+      name,
+      email,
+      attendance,
+      guests,
+      song: song || null,
+      message: message || null,
+      plusOneNames: plusOneNames || null,
+      allergies: allergies || null,
+      roomNeeded: roomNeeded ? 1 : 0,
+      roomCount: roomCount || 0,
+    });
+  };
 }
 
-export default { insertRsvp, listRsvps, deleteRsvp };
+export default { insertRsvp, listRsvps, deleteRsvp, updateRsvp };

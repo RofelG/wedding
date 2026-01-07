@@ -96,7 +96,10 @@ router.get("/data", checkAuth, async (_req, res) => {
     const totals = mapped.reduce(
       (acc, row) => {
         const count = Number.parseInt(row.guest_count, 10) || 0;
+        const roomGuests = row.needs_room ? Number.parseInt(row.room_count, 10) || 0 : 0;
         acc.total += count;
+        acc.roomGuests += roomGuests;
+        if (row.needs_room) acc.roomReservations += 1;
         if ((row.attendance || "").toLowerCase() === "yes") {
           acc.yes += count;
         }
@@ -105,7 +108,7 @@ router.get("/data", checkAuth, async (_req, res) => {
         }
         return acc;
       },
-      { total: 0, yes: 0, maybe: 0 }
+      { total: 0, yes: 0, maybe: 0, roomGuests: 0, roomReservations: 0 }
     );
     res.json({ ok: true, rows: mapped, totals });
   } catch (err) {
@@ -125,6 +128,66 @@ router.delete("/rsvp/:id", checkAuth, async (req, res) => {
   } catch (err) {
     console.error("Admin delete failed", err);
     res.status(500).json({ error: "Failed to delete RSVP" });
+  }
+});
+
+router.put("/rsvp/:id", checkAuth, async (req, res) => {
+  const id = Number.parseInt(req.params.id, 10);
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ error: "Invalid RSVP id" });
+  }
+  const {
+    full_name,
+    email,
+    attendance,
+    guest_count,
+    song_request,
+    message,
+    plus_one_names,
+    food_allergies,
+    needs_room,
+    room_count,
+  } = req.body || {};
+
+  if (!full_name || !email || !attendance) {
+    return res.status(400).json({ error: "Name, email, and attendance are required." });
+  }
+
+  const guestCount = Number.parseInt(guest_count, 10);
+  if (!Number.isFinite(guestCount) || guestCount < 0) {
+    return res.status(400).json({ error: "Guest count must be zero or more." });
+  }
+
+  const normalizedAttendance = attendance.toLowerCase();
+  const allowedAttendance = ["yes", "no", "maybe"];
+  if (!allowedAttendance.includes(normalizedAttendance)) {
+    return res.status(400).json({ error: "Attendance must be yes, no, or maybe." });
+  }
+
+  const wantsRoom = needs_room === true || needs_room === "true" || needs_room === 1 || needs_room === "1";
+  const roomCountNum = Number.parseInt(room_count, 10) || 0;
+  if (wantsRoom && guestCount > 0 && roomCountNum > guestCount) {
+    return res.status(400).json({ error: "Room count cannot exceed guest count." });
+  }
+  const normalizedRoomCount = wantsRoom ? roomCountNum : 0;
+
+  try {
+    await db.updateRsvp(id, {
+      name: full_name.trim(),
+      email: email.trim(),
+      attendance: normalizedAttendance,
+      guests: guestCount,
+      song: song_request,
+      message,
+      plusOneNames: plus_one_names,
+      allergies: food_allergies || null,
+      roomNeeded: wantsRoom,
+      roomCount: normalizedRoomCount,
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Admin update failed", err);
+    res.status(500).json({ error: "Failed to update RSVP" });
   }
 });
 

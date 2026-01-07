@@ -27,7 +27,8 @@
       </div>
       <div class="d-flex gap-2">
         <span class="pill text-muted">Protected</span>
-        <span class="pill" id="guestCountPill">Total: —</span>
+        <span class="pill" id="guestCountPill">Guests: --</span>
+        <span class="pill" id="roomCountPill">Rooms: --</span>
       </div>
     </div>
     <div id="status" class="alert alert-info">Loading responses…</div>
@@ -59,9 +60,83 @@
     </div>
   </div>
 
+  <!-- Edit Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit RSVP</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editForm" class="row g-3">
+            <input type="hidden" id="editId" />
+            <div class="col-md-6">
+              <label class="form-label">Full Name *</label>
+              <input type="text" class="form-control" id="editName" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email *</label>
+              <input type="email" class="form-control" id="editEmail" required />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Attendance *</label>
+              <select class="form-select" id="editAttendance" required>
+                <option value="yes">Yes</option>
+                <option value="maybe">Maybe</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Guest Count *</label>
+              <input type="number" min="0" class="form-control" id="editGuests" required />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Song Request</label>
+              <input type="text" class="form-control" id="editSong" />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Message</label>
+              <textarea class="form-control" rows="2" id="editMessage"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Plus One Names</label>
+              <input type="text" class="form-control" id="editPlusOnes" placeholder="Comma-separated names" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Food Allergies</label>
+              <input type="text" class="form-control" id="editAllergies" placeholder="Text or JSON" />
+              <div class="form-text text-muted">If JSON is provided, it will be stored as-is.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Needs Room?</label>
+              <select class="form-select" id="editNeedsRoom">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+              </select>
+              <div class="form-text">Rooms are 1000 PHP or $25/night.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Room Count</label>
+              <input type="number" min="0" class="form-control" id="editRoomCount" />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <div id="editStatus" class="text-danger small me-auto"></div>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="saveEditBtn">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <%- include('partials/footer') %>
 
   <script>
+    var editModal;
+    var rsvpRows = new Map();
+
     function badge(att) {
       if (att === "yes") return '<span class="badge badge-yes">Yes</span>';
       if (att === "maybe") return '<span class="badge badge-maybe">Maybe</span>';
@@ -84,30 +159,41 @@
     function fmtAllergies(row) {
       if (!row.food_allergies) return "";
       if (Array.isArray(row.food_allergies)) {
-        return row.food_allergies.map(g => (g.name ? g.name + (g.allergies ? " (" + g.allergies + ")" : "") : g.allergies)).filter(Boolean).join("; ");
+        return row.food_allergies
+          .map(function (g) {
+            return g.name ? g.name + (g.allergies ? " (" + g.allergies + ")" : "") : g.allergies;
+          })
+          .filter(Boolean)
+          .join("; ");
       }
       return row.food_allergies;
     }
 
     async function loadData() {
-      const status = document.getElementById("status");
+      var status = document.getElementById("status");
       status.className = "alert alert-info";
       status.textContent = "Loading responses…";
       try {
-        const res = await fetch("/admin/data");
-        const data = await res.json();
+        var res = await fetch("/admin/data");
+        var data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to load");
         status.className = "visually-hidden";
         if (data.totals && typeof data.totals.total !== "undefined") {
-          const pill = document.getElementById("guestCountPill");
+          var pill = document.getElementById("guestCountPill");
+          var roomPill = document.getElementById("roomCountPill");
           if (pill) {
-            pill.textContent = `Expected: ${data.totals.yes || 0} (Yes) / ${data.totals.total || 0} (All)`;
+            pill.textContent = "Expected: " + (data.totals.yes || 0) + " (Yes) / " + (data.totals.total || 0) + " (All)";
+          }
+          if (roomPill) {
+            roomPill.textContent = "Rooms: " + (data.totals.roomReservations || 0) + " / People: " + (data.totals.roomGuests || 0);
           }
         }
-        const tbody = document.querySelector("#rsvpTable tbody");
+        var tbody = document.querySelector("#rsvpTable tbody");
         tbody.innerHTML = "";
-        data.rows.forEach((row) => {
-          const tr = document.createElement("tr");
+        rsvpRows.clear();
+        data.rows.forEach(function (row) {
+          rsvpRows.set(row.id, row);
+          var tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${row.id}</td>
             <td>${row.full_name}</td>
@@ -121,7 +207,10 @@
             <td>${row.song_request || ""}</td>
             <td>${row.message || ""}</td>
             <td>${row.created_at || ""}</td>
-            <td><button class="btn btn-sm btn-outline-danger delete-btn" data-id="${row.id}">Delete</button></td>
+            <td class="text-nowrap">
+              <button class="btn btn-sm btn-outline-light edit-btn" data-id="${row.id}">Edit</button>
+              <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${row.id}">Delete</button>
+            </td>
           `;
           tbody.appendChild(tr);
         });
@@ -132,10 +221,10 @@
     }
 
     async function deleteRsvp(id) {
-      const status = document.getElementById("status");
+      var status = document.getElementById("status");
       try {
-        const res = await fetch(`/admin/rsvp/${id}`, { method: "DELETE" });
-        const data = await res.json();
+        var res = await fetch("/admin/rsvp/" + id, { method: "DELETE" });
+        var data = await res.json();
         if (!res.ok) throw new Error(data.error || "Delete failed");
         status.className = "alert alert-success mt-3";
         status.textContent = "RSVP deleted.";
@@ -146,15 +235,85 @@
       }
     }
 
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".delete-btn");
-      if (!btn) return;
-      const id = btn.getAttribute("data-id");
-      if (!id) return;
-      const confirmed = window.confirm("Delete this RSVP? This cannot be undone.");
-      if (!confirmed) return;
-      deleteRsvp(id);
+    function openEdit(id) {
+      var row = rsvpRows.get(Number(id));
+      if (!row) return;
+      document.getElementById("editId").value = row.id;
+      document.getElementById("editName").value = row.full_name || "";
+      document.getElementById("editEmail").value = row.email || "";
+      document.getElementById("editAttendance").value = (row.attendance || "yes").toLowerCase();
+      document.getElementById("editGuests").value = row.guest_count || 0;
+      document.getElementById("editSong").value = row.song_request || "";
+      document.getElementById("editMessage").value = row.message || "";
+      document.getElementById("editPlusOnes").value = row.plus_one_names || "";
+      var allergyField = document.getElementById("editAllergies");
+      if (Array.isArray(row.food_allergies)) {
+        allergyField.value = JSON.stringify(row.food_allergies);
+      } else {
+        allergyField.value = row.food_allergies || "";
+      }
+      document.getElementById("editNeedsRoom").value = row.needs_room ? "true" : "false";
+      document.getElementById("editRoomCount").value = row.room_count || 0;
+      var status = document.getElementById("editStatus");
+      status.textContent = "";
+      var modalEl = document.getElementById("editModal");
+      editModal = editModal || new bootstrap.Modal(modalEl);
+      editModal.show();
+    }
+
+    async function saveEdit() {
+      var status = document.getElementById("editStatus");
+      status.textContent = "";
+      var id = document.getElementById("editId").value;
+      var payload = {
+        full_name: document.getElementById("editName").value.trim(),
+        email: document.getElementById("editEmail").value.trim(),
+        attendance: document.getElementById("editAttendance").value,
+        guest_count: Number(document.getElementById("editGuests").value || 0),
+        song_request: document.getElementById("editSong").value.trim(),
+        message: document.getElementById("editMessage").value.trim(),
+        plus_one_names: document.getElementById("editPlusOnes").value.trim(),
+        food_allergies: document.getElementById("editAllergies").value.trim(),
+        needs_room: document.getElementById("editNeedsRoom").value === "true",
+        room_count: Number(document.getElementById("editRoomCount").value || 0),
+      };
+      try {
+        var res = await fetch("/admin/rsvp/" + id, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Update failed");
+        if (editModal) editModal.hide();
+        await loadData();
+        var mainStatus = document.getElementById("status");
+        mainStatus.className = "alert alert-success mt-3";
+        mainStatus.textContent = "RSVP updated.";
+      } catch (err) {
+        status.textContent = err.message;
+      }
+    }
+
+    document.addEventListener("click", function (e) {
+      var delBtn = e.target.closest(".delete-btn");
+      if (delBtn) {
+        var id = delBtn.getAttribute("data-id");
+        if (!id) return;
+        var confirmed = window.confirm("Delete this RSVP? This cannot be undone.");
+        if (!confirmed) return;
+        deleteRsvp(id);
+        return;
+      }
+      var editBtn = e.target.closest(".edit-btn");
+      if (editBtn) {
+        var editId = editBtn.getAttribute("data-id");
+        if (!editId) return;
+        openEdit(editId);
+      }
     });
+
+    document.getElementById("saveEditBtn").addEventListener("click", saveEdit);
 
     loadData();
   </script>
