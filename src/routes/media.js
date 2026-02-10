@@ -14,8 +14,8 @@ const uploadsDir = process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads"
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
-console.log(`Media uploads will be saved to: ${uploadsDir}`);
 const allowedExt = /\.(jpe?g|png|gif|webp|avif)$/i;
+const dateTakenCache = new Map();
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadsDir),
@@ -110,7 +110,6 @@ router.post("/upload", hasMediaAccess, uploadMany, async (req, res) => {
 
   const results = [];
   for (const file of files) {
-    console.log(`Saved upload: ${file.filename} -> ${file.path}`);
     results.push({
       filename: file.filename,
       path: file.path,
@@ -164,9 +163,14 @@ router.get("/api/uploads", hasMediaAccess, (req, res) => {
       .map((name) => {
         const full = path.join(uploadsDir, name);
         const stat = fs.statSync(full);
-        return { name, mtime: stat.mtimeMs, size: stat.size };
+        const dateTaken = getDateTakenMs(full, stat);
+        return { name, mtime: stat.mtimeMs, size: stat.size, dateTaken };
       })
-      .sort((a, b) => b.mtime - a.mtime);
+      .sort((a, b) => {
+        const aSort = a.dateTaken ?? a.mtime;
+        const bSort = b.dateTaken ?? b.mtime;
+        return bSort - aSort;
+      });
   } catch (err) {
     console.error("Failed to list uploads", err);
     return res.status(500).json({ error: "Could not list uploads" });
@@ -180,6 +184,7 @@ router.get("/api/uploads", hasMediaAccess, (req, res) => {
     thumbUrl: `/media/uploads/${encodeURIComponent(f.name)}`,
     size: f.size,
     uploadedAt: f.mtime,
+    dateTaken: f.dateTaken ?? null,
   }));
 
   res.json({
@@ -191,6 +196,166 @@ router.get("/api/uploads", hasMediaAccess, (req, res) => {
     hasMore: start + pageSize < total,
   });
 });
+
+function getDateTakenMs(filePath, stat) {
+  const cacheKey = `${filePath}:${stat.mtimeMs}:${stat.size}`;
+  if (dateTakenCache.has(cacheKey)) {
+    return dateTakenCache.get(cacheKey);
+  }
+
+  let dateTaken = null;
+  const ext = path.extname(filePath).toLowerCase();
+  if (ext === ".jpg" || ext === ".jpeg") {
+    dateTaken = readJpegExifDateTaken(filePath);
+  }
+
+  dateTakenCache.set(cacheKey, dateTaken);
+  return dateTaken;
+}
+
+function readJpegExifDateTaken(filePath) {
+  try {
+    const buf = fs.readFileSync(filePath);
+    if (buf.length < 4 || buf[0] !== 0xff || buf[1] !== 0xd8) return null;
+
+    let offset = 2;
+    while (offset + 4 <= buf.length) {
+      if (buf[offset] !== 0xff) {
+        offset += 1;
+        continue;
+      }
+
+      const marker = buf[offset + 1];
+      if (marker === 0xda || marker === 0xd9) break;
+
+      const segmentLength = buf.readUInt16BE(offset + 2);
+      if (segmentLength < 2 || offset + 2 + segmentLength > buf.length) break;
+
+      if (marker === 0xe1) {
+        const start = offset + 4;
+        const end = offset + 2 + segmentLength;
+        if (buf.slice(start, start + 6).toString("ascii") === "Exif\0\0") {
+          const exifData = buf.slice(start + 6, end);
+          const dateStr = readExifDateTimeOriginalFromTiff(exifData);
+          const parsed = parseExifDateString(dateStr);
+          if (parsed) return parsed;
+        }
+      }
+
+      offset += 2 + segmentLength;
+    }
+  } catch (err) {
+    console.warn("Failed to read EXIF date for", filePath, err.message);
+  }
+  return null;
+}
+
+function readExifDateTimeOriginalFromTiff(tiffData) {
+  if (tiffData.length < 8) return null;
+
+  const byteOrder = tiffData.toString("ascii", 0, 2);
+  const littleEndian = byteOrder === "II";
+  if (!littleEndian && byteOrder !== "MM") return null;
+
+  const readU16 = (pos) =>
+    littleEndian ? tiffData.readUInt16LE(pos) : tiffData.readUInt16BE(pos);
+  const readU32 = (pos) =>
+    littleEndian ? tiffData.readUInt32LE(pos) : tiffData.readUInt32BE(pos);
+
+  if (readU16(2) !== 42) return null;
+  const ifd0Offset = readU32(4);
+
+  const exifIfdOffset = findIfdTagValue(tiffData, ifd0Offset, 0x8769, readU16, readU32);
+  if (!exifIfdOffset) return null;
+
+  const dateTag = findIfdAsciiTag(tiffData, exifIfdOffset, 0x9003, readU16, readU32);
+  if (dateTag) return dateTag;
+
+  return findIfdAsciiTag(tiffData, ifd0Offset, 0x0132, readU16, readU32);
+}
+
+function findIfdTagValue(tiffData, ifdOffset, wantedTag, readU16, readU32) {
+  if (ifdOffset + 2 > tiffData.length) return null;
+  const count = readU16(ifdOffset);
+  let entryOffset = ifdOffset + 2;
+
+  for (let i = 0; i < count; i += 1) {
+    if (entryOffset + 12 > tiffData.length) return null;
+    const tag = readU16(entryOffset);
+    if (tag === wantedTag) {
+      return readU32(entryOffset + 8);
+    }
+    entryOffset += 12;
+  }
+  return null;
+}
+
+function findIfdAsciiTag(tiffData, ifdOffset, wantedTag, readU16, readU32) {
+  if (ifdOffset + 2 > tiffData.length) return null;
+  const count = readU16(ifdOffset);
+  let entryOffset = ifdOffset + 2;
+
+  for (let i = 0; i < count; i += 1) {
+    if (entryOffset + 12 > tiffData.length) return null;
+    const tag = readU16(entryOffset);
+    if (tag !== wantedTag) {
+      entryOffset += 12;
+      continue;
+    }
+
+    const type = readU16(entryOffset + 2);
+    const valueCount = readU32(entryOffset + 4);
+    const valueOffset = readU32(entryOffset + 8);
+
+    if (type !== 2 || valueCount === 0) return null;
+
+    if (valueCount <= 4) {
+      return tiffData
+        .slice(entryOffset + 8, entryOffset + 8 + valueCount)
+        .toString("ascii")
+        .replace(/\0/g, "")
+        .trim();
+    }
+
+    if (valueOffset + valueCount > tiffData.length) return null;
+    return tiffData
+      .slice(valueOffset, valueOffset + valueCount)
+      .toString("ascii")
+      .replace(/\0/g, "")
+      .trim();
+  }
+  return null;
+}
+
+function parseExifDateString(value) {
+  if (!value) return null;
+  const match = String(value)
+    .trim()
+    .match(/^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+  const second = Number(match[6]);
+
+  if (
+    !Number.isFinite(year) ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31 ||
+    hour > 23 ||
+    minute > 59 ||
+    second > 59
+  ) {
+    return null;
+  }
+
+  return new Date(year, month - 1, day, hour, minute, second).getTime();
+}
 
 function hasMediaAccess(req, res, next) {
   if (!hasAccess(req)) {

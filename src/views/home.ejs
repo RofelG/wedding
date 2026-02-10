@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<%= process.env.GA_TRACKING_ID %>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', '<%= process.env.GA_TRACKING_ID %>');
+  </script>
+
   <meta charset="UTF-8" />
   <title>Rofel & Julie Ann | Wedding Website</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -231,10 +242,9 @@
                 <strong>Dress Code:</strong> Semi-formal / Dress to dance
               </p>
               <div class="mb-2 d-flex flex-row align-items-center">
-                <span class="color" data-toggle="tooltip" data-placement="top" title="Navy Blue"></span>
+                <span class="color" data-toggle="tooltip" data-placement="top" title="Powder Blue"></span>
                 <span class="color" data-toggle="tooltip" data-placement="top" title="Burgundy"></span>
                 <span class="color" data-toggle="tooltip" data-placement="top" title="Sage Green"></span>
-                <span class="color" data-toggle="tooltip" data-placement="top" title="Terracotta"></span>
                 <span class="color" data-toggle="tooltip" data-placement="top" title="Champagne"></span>
                 <span class="color" data-toggle="tooltip" data-placement="top" title="Coral"></span>
               </div>
