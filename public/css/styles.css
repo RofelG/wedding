@@ -8,8 +8,7 @@
 /* Navbar */
 .navbar {
   background: rgba(255, 255, 255, 0.65);
-  -webkit-backdrop-filter: blur(10px);
-          backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
@@ -98,8 +97,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  -webkit-backdrop-filter: blur(5px);
-          backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
 }
 
 .hero-badge i {
@@ -535,6 +533,300 @@ footer {
   background: rgba(255, 229, 236, 0.45);
 }
 
+/* RSVP thank you page */
+.thankyou-wrap {
+  position: relative;
+  padding: 124px 0 72px;
+  overflow: hidden;
+}
+
+.thankyou-orb {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  filter: blur(2px);
+  z-index: 0;
+  opacity: 0.55;
+  animation: thankyouOrbFloat 6s ease-in-out infinite;
+}
+
+.thankyou-orb--left {
+  left: -140px;
+  top: 110px;
+  background: radial-gradient(circle, rgba(255, 180, 201, 0.7), rgba(255, 180, 201, 0));
+}
+
+.thankyou-orb--right {
+  right: -120px;
+  top: 240px;
+  background: radial-gradient(circle, rgba(255, 151, 102, 0.45), rgba(255, 151, 102, 0));
+  animation-delay: 1.5s;
+}
+
+.thankyou-wrap .container {
+  position: relative;
+  z-index: 1;
+}
+
+.thankyou-hero {
+  background: linear-gradient(130deg, #fff, #fff8fb 60%, #ffefe5);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 111, 145, 0.14);
+  box-shadow: 0 24px 55px rgba(130, 68, 33, 0.12);
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  animation: thankyouRise 0.55s ease both;
+}
+
+.thankyou-hero__content p {
+  max-width: 560px;
+}
+
+.thankyou-hero__date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(202, 102, 65, 0.16);
+}
+
+.thankyou-hero__date i {
+  color: var(--wedding-primary);
+  font-size: 1.2rem;
+}
+
+.thankyou-shell {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 111, 145, 0.16);
+  border-radius: 22px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.08);
+  padding: 1.7rem;
+  backdrop-filter: blur(8px);
+}
+
+.thankyou-shell__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.thankyou-events {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.thankyou-events--single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.thankyou-event-card {
+  border: 1px solid rgba(255, 111, 145, 0.2);
+  background: linear-gradient(180deg, #fff, #fff6fa);
+  border-radius: 16px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-height: 210px;
+  box-shadow: 0 8px 22px rgba(255, 111, 145, 0.12);
+  animation: thankyouRise 0.5s ease both;
+  animation-delay: calc(var(--stagger, 0) * 110ms);
+}
+
+.thankyou-event-card > .btn {
+  margin-top: auto;
+}
+
+.thankyou-event-card--ical {
+  background: linear-gradient(180deg, #fffdf6, #fff6ea);
+}
+
+.thankyou-event-card--calendar {
+  background: linear-gradient(180deg, #fff, #fff6fa);
+  border-color: rgba(255, 111, 145, 0.2);
+  box-shadow: 0 8px 22px rgba(255, 111, 145, 0.12);
+}
+
+.thankyou-event-actions {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.thankyou-choice-links {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  font-size: 0.88rem;
+}
+
+.thankyou-choice-links a {
+  color: var(--wedding-primary);
+  text-decoration: none;
+}
+
+.thankyou-choice-links a:hover {
+  text-decoration: underline;
+}
+
+.thankyou-calendar-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  color: #5a6572;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.thankyou-calendar-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.thankyou-calendar-meta i {
+  font-size: 1rem;
+  color: var(--wedding-primary);
+}
+
+.calendar-toggle {
+  margin-top: 0.35rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 111, 145, 0.35);
+  border-radius: 12px;
+  padding: 0.8rem 0.95rem;
+  background: #fff;
+  color: #4a4f5a;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.calendar-toggle__chevron {
+  transition: transform 0.18s ease;
+}
+
+.calendar-toggle[aria-expanded=false] .calendar-toggle__chevron {
+  transform: rotate(180deg);
+}
+
+.calendar-menu {
+  margin-top: 0.35rem;
+  border: 1px solid rgba(255, 111, 145, 0.28);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.calendar-option {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.75rem 0.95rem;
+  text-decoration: none;
+  color: #5a6572;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.calendar-option i {
+  font-size: 1rem;
+  width: 1.55rem;
+  text-align: center;
+  color: var(--wedding-primary);
+}
+
+.calendar-option + .calendar-option {
+  border-top: 1px solid rgba(255, 111, 145, 0.15);
+}
+
+.calendar-option:hover {
+  background: #fff5f8;
+  color: #434347;
+}
+
+.calendar-option--highlight {
+  background: rgba(255, 111, 145, 0.1);
+}
+
+.thankyou-event-card__top {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+}
+
+.thankyou-event-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(202, 102, 65, 0.12);
+  color: var(--wedding-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.thankyou-event-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.thankyou-event-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #5a6572;
+}
+
+.thankyou-event-meta i {
+  color: var(--wedding-primary);
+}
+
+.thankyou-shell__actions {
+  margin-top: 1.4rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+@keyframes thankyouRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes thankyouOrbFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
 @media (max-width: 767.98px) {
   #hero {
     text-align: center;
@@ -688,5 +980,103 @@ footer {
     font-size: 0.9rem;
     line-height: 1.2;
     text-align: left;
+  }
+}
+@media (max-width: 991.98px) {
+  .thankyou-events {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 575.98px) {
+  .thankyou-wrap {
+    padding-top: 108px;
+  }
+  .thankyou-hero,
+  .thankyou-shell {
+    border-radius: 16px;
+    padding: 1.2rem;
+  }
+  .thankyou-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .thankyou-hero__date {
+    width: 100%;
+  }
+  .thankyou-events--single {
+    max-width: 100%;
+  }
+  .thankyou-calendar-meta {
+    font-size: 0.96rem;
+  }
+  .thankyou-calendar-meta i {
+    font-size: 0.95rem;
+  }
+  .calendar-option {
+    font-size: 0.96rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .thankyou-orb,
+  .thankyou-hero,
+  .thankyou-event-card {
+    animation: none;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .thankyou-hero {
+    background: linear-gradient(135deg, #1a1f2a, #202635);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+  }
+  .thankyou-hero__date,
+  .thankyou-shell {
+    background: rgba(22, 26, 35, 0.88);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .thankyou-event-card {
+    background: linear-gradient(180deg, #1a1f2a, #1f2533);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+  }
+  .thankyou-event-icon {
+    background: rgba(255, 133, 92, 0.17);
+  }
+  .thankyou-event-meta span {
+    color: #bcc3cf;
+  }
+  .thankyou-shell__actions {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+  .thankyou-choice-links a {
+    color: #ffc2ab;
+  }
+  .thankyou-event-card--calendar {
+    background: linear-gradient(180deg, #1a1f2a, #1f2533);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  .thankyou-calendar-meta,
+  .calendar-option {
+    color: #dadde4;
+  }
+  .thankyou-calendar-meta i,
+  .calendar-option i {
+    color: #aab2c1;
+  }
+  .calendar-toggle {
+    background: #151a23;
+    border-color: rgba(255, 133, 92, 0.3);
+    color: #e8ebf2;
+  }
+  .calendar-menu {
+    background: #171c26;
+    border-color: rgba(255, 133, 92, 0.25);
+  }
+  .calendar-option + .calendar-option {
+    border-top-color: #303643;
+  }
+  .calendar-option:hover,
+  .calendar-option--highlight {
+    background: #212734;
   }
 }/*# sourceMappingURL=styles.css.map */

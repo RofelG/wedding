@@ -321,6 +321,39 @@
         </div>
       </div>
 
+      <div class="row g-4 mt-2">
+        <div class="col-lg-8 mx-auto">
+          <div class="card detail-card h-100">
+            <div class="card-body text-center">
+              <div class="detail-icon">
+                <i class="bi bi-calendar2-check-fill"></i>
+              </div>
+              <h5 class="card-title">Save to Calendar</h5>
+              <p class="text-muted mb-2">
+                <strong><%= calendarDisplayDate %></strong>
+              </p>
+              <p class="text-muted mb-3">
+                <strong>Time:</strong> <%= calendarDisplayTime %> (Philippines Time)
+              </p>
+              <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a class="btn btn-wedding-primary" href="<%= calendarIcsSubscribeWebcalUrl %>">
+                  <i class="bi bi-arrow-repeat me-1"></i> Subscribe Calendar
+                </a>
+                <a class="btn btn-outline-secondary" href="<%= calendarGoogleUrl %>" target="_blank" rel="noopener noreferrer">
+                  <i class="bi bi-google me-1"></i> Add to Google Calendar
+                </a>
+                <a class="btn btn-outline-secondary" href="<%= calendarIcsDownloadUrl %>">
+                  <i class="bi bi-download me-1"></i> Download iCal (.ics)
+                </a>
+                <a class="btn btn-outline-secondary" href="<%= calendarIcsSubscribeHttpsUrl %>" target="_blank" rel="noopener noreferrer">
+                  <i class="bi bi-link-45deg me-1"></i> Feed URL
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 

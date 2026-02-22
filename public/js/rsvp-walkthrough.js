@@ -324,13 +324,10 @@ document.addEventListener("DOMContentLoaded", function () {
         throw new Error(data.error || "Sorry, something went wrong.");
       }
       showAlert("Thank you! We have your response.", "success");
-      form.reset();
-      renderGuestDetails();
-      showStep(0);
       lockForm();
       redirectTimer = setTimeout(function () {
-        window.location.href = "/";
-      }, 2500);
+        window.location.href = "/rsvp/thank-you";
+      }, 900);
     } catch (err) {
       showAlert(err.message);
     }

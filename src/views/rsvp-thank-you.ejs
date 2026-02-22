@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<%= process.env.GA_TRACKING_ID %>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', '<%= process.env.GA_TRACKING_ID %>');
+  </script>
+
+  <meta charset="UTF-8" />
+  <title>Thank You | Rofel & Julie Ann</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+  />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="rsvp-page">
+  <%- include('partials/nav', { navLinks, brandHref: '/' }) %>
+
+  <section class="thankyou-wrap">
+    <div class="thankyou-orb thankyou-orb--left"></div>
+    <div class="thankyou-orb thankyou-orb--right"></div>
+    <div class="container">
+      <div class="thankyou-hero">
+        <div class="thankyou-hero__content">
+          <span class="hero-chip">
+            <i class="bi bi-check2-circle"></i> RSVP Received
+          </span>
+          <h1 class="display-5 mt-3 mb-2">You’re on our list</h1>
+          <p class="text-muted mb-0">
+            Add the day to your calendar so you don’t miss any part of our celebration.
+          </p>
+        </div>
+        <div class="thankyou-hero__date">
+          <i class="bi bi-calendar2-heart-fill"></i>
+          <div>
+            <div class="hero-date">May 18, 2026</div>
+            <div class="hero-place">Batac City & Currimao, Ilocos Norte</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="thankyou-shell mt-4 mt-lg-5">
+        <div class="thankyou-shell__head">
+          <div>
+            <p class="text-uppercase text-muted small mb-1">Calendar Options</p>
+            <h2 class="h3 mb-0">Save all events in one click</h2>
+          </div>
+        </div>
+
+        <div class="thankyou-events thankyou-events--single">
+          <article class="thankyou-event-card thankyou-event-card--calendar" style="--stagger: 0;">
+            <div class="thankyou-event-card__top">
+              <div class="thankyou-event-icon">
+                <i class="bi bi-calendar2-week"></i>
+              </div>
+              <div>
+                <h3 class="h5 mb-1">Add to Calendar</h3>
+                <p class="small text-muted mb-0">Pick your calendar app below.</p>
+              </div>
+            </div>
+            <div class="thankyou-calendar-meta">
+              <span><i class="bi bi-calendar-event"></i> <%= googleDisplayDate %></span>
+              <span><i class="bi bi-clock"></i> <%= googleDisplayTime %> (PHT)</span>
+            </div>
+            <div class="calendar-menu-anchor">
+              <button
+                type="button"
+                class="calendar-toggle"
+                id="calendarMenuToggle"
+                aria-expanded="false"
+                aria-controls="calendarMenu"
+              >
+                <span><i class="bi bi-calendar3 me-2"></i>ADD TO CALENDAR</span>
+                <i class="bi bi-chevron-up calendar-toggle__chevron"></i>
+              </button>
+              <div class="calendar-menu" id="calendarMenu" hidden>
+                <a class="calendar-option" href="<%= allEventsIcsDownloadUrl %>">
+                  <i class="bi bi-download"></i> Download ICS (snapshot)
+                </a>
+                <a class="calendar-option calendar-option--highlight" href="<%= allEventsIcsSubscribeWebcalUrl %>">
+                  <i class="bi bi-arrow-repeat"></i> Subscribe (auto updates)
+                </a>
+                <a class="calendar-option" href="<%= allEventsIcsSubscribeHttpsUrl %>" target="_blank" rel="noopener noreferrer">
+                  <i class="bi bi-link-45deg"></i> Feed URL (HTTPS)
+                </a>
+                <a class="calendar-option" href="<%= googleFallbackUrl %>" target="_blank" rel="noopener noreferrer">
+                  <i class="bi bi-google"></i> Google Calendar
+                </a>
+                <a class="calendar-option" href="<%= office365Url %>" target="_blank" rel="noopener noreferrer">
+                  <i class="bi bi-microsoft"></i> Office 365
+                </a>
+                <a class="calendar-option" href="<%= outlookLiveUrl %>" target="_blank" rel="noopener noreferrer">
+                  <i class="bi bi-envelope-at"></i> Outlook Live
+                </a>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="thankyou-shell__actions">
+          <a href="/" class="btn btn-primary">Back to Home</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+  <script src="/js/rsvp-thank-you.js"></script>
+</body>
+</html>
