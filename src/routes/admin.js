@@ -9,6 +9,7 @@ const ADMIN_COOKIE = "admin_auth";
 const EXPORT_COLUMNS = [
   { key: "id", label: "Entry ID" },
   { key: "full_name", label: "Entry Name" },
+  { key: "status", label: "Status" },
   { key: "guest_label", label: "Guest" },
   { key: "guest_name", label: "Guest Name" },
   { key: "guest_count", label: "Party Size" },
@@ -76,6 +77,7 @@ function normalizeRow(row) {
 
   const needsRoom = row.needs_room ? Boolean(Number(row.needs_room)) : false;
   const guestCount = Number.parseInt(row.guest_count, 10) || 0;
+  const normalizedStatus = String(row.status || "active").toLowerCase();
   const guestDetails = Array.isArray(parsedAllergies)
     ? parsedAllergies.map((guest) => ({
         name: String(guest?.name || "").trim(),
@@ -107,6 +109,7 @@ function normalizeRow(row) {
     ...row,
     needs_room: needsRoom,
     needs_room_label: needsRoom ? "Yes" : "No",
+    status: normalizedStatus,
     guest_count: guestCount,
     room_count: Number.parseInt(row.room_count, 10) || 0,
     food_allergies: parsedAllergies,
@@ -124,6 +127,10 @@ async function getAdminRows() {
 function getTotals(rows) {
   return rows.reduce(
     (acc, row) => {
+      if (row.status === "deleted") {
+        acc.deleted += 1;
+        return acc;
+      }
       const count = Number.parseInt(row.guest_count, 10) || 0;
       const roomGuests = row.needs_room ? Number.parseInt(row.room_count, 10) || 0 : 0;
       acc.total += count;
@@ -137,7 +144,7 @@ function getTotals(rows) {
       }
       return acc;
     },
-    { total: 0, yes: 0, maybe: 0, roomGuests: 0, roomReservations: 0 }
+    { total: 0, yes: 0, maybe: 0, roomGuests: 0, roomReservations: 0, deleted: 0 }
   );
 }
 
@@ -245,7 +252,9 @@ router.get("/export", checkAuth, async (req, res) => {
 
   try {
     const rows = await getAdminRows();
-    const exportRows = flattenExportRows(rows);
+    const exportRows = flattenExportRows(
+      rows.filter((row) => row.status !== "deleted")
+    );
 
     if (format === "csv") {
       const header = EXPORT_COLUMNS.map((column) => escapeCsv(column.label)).join(",");
