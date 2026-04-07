@@ -26,6 +26,8 @@
         <h1 class="h4 mb-0">RSVP Admin</h1>
       </div>
       <div class="d-flex gap-2">
+        <a class="btn btn-sm btn-outline-light" href="/admin/export?format=csv">Export CSV</a>
+        <a class="btn btn-sm btn-outline-light" href="/admin/export?format=xls">Export XLS</a>
         <span class="pill text-muted">Protected</span>
         <span class="pill" id="guestCountPill">Guests: --</span>
         <span class="pill" id="roomCountPill">Rooms: --</span>
@@ -131,10 +133,25 @@
     </div>
   </div>
 
+  <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="messageModalTitle">Guest message</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0" id="messageModalBody" style="white-space: pre-wrap;"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <%- include('partials/footer') %>
 
   <script>
     var editModal;
+    var messageModal;
     var rsvpRows = new Map();
 
     function badge(att) {
@@ -142,6 +159,18 @@
       if (att === "maybe") return '<span class="badge badge-maybe">Maybe</span>';
       if (att === "no") return '<span class="badge badge-no">No</span>';
       return att || "";
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, function (char) {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }[char];
+      });
     }
 
     function fmtPlusNames(row) {
@@ -167,6 +196,11 @@
           .join("; ");
       }
       return row.food_allergies;
+    }
+
+    function messageCell(row) {
+      if (!row.message) return '<span class="text-muted">-</span>';
+      return '<button class="btn btn-sm btn-outline-info view-message-btn" data-id="' + row.id + '">View</button>';
     }
 
     async function loadData() {
@@ -196,17 +230,17 @@
           var tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${row.id}</td>
-            <td>${row.full_name}</td>
-            <td>${row.email}</td>
+            <td>${escapeHtml(row.full_name)}</td>
+            <td>${escapeHtml(row.email)}</td>
             <td>${badge(row.attendance)}</td>
             <td>${row.guest_count}</td>
-            <td>${fmtRoom(row)}</td>
+            <td>${escapeHtml(fmtRoom(row))}</td>
             <td>${fmtRoomCount(row)}</td>
-            <td>${fmtPlusNames(row)}</td>
-            <td>${fmtAllergies(row)}</td>
-            <td>${row.song_request || ""}</td>
-            <td>${row.message || ""}</td>
-            <td>${row.created_at || ""}</td>
+            <td>${escapeHtml(fmtPlusNames(row))}</td>
+            <td>${escapeHtml(fmtAllergies(row))}</td>
+            <td>${escapeHtml(row.song_request || "")}</td>
+            <td>${messageCell(row)}</td>
+            <td>${escapeHtml(row.created_at || "")}</td>
             <td class="text-nowrap">
               <button class="btn btn-sm btn-outline-light edit-btn" data-id="${row.id}">Edit</button>
               <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${row.id}">Delete</button>
@@ -233,6 +267,16 @@
         status.className = "alert alert-danger mt-3";
         status.textContent = err.message;
       }
+    }
+
+    function openMessage(id) {
+      var row = rsvpRows.get(Number(id));
+      if (!row || !row.message) return;
+      document.getElementById("messageModalTitle").textContent = (row.full_name || "Guest") + "'s message";
+      document.getElementById("messageModalBody").textContent = row.message;
+      var modalEl = document.getElementById("messageModal");
+      messageModal = messageModal || new bootstrap.Modal(modalEl);
+      messageModal.show();
     }
 
     function openEdit(id) {
@@ -310,6 +354,13 @@
         var editId = editBtn.getAttribute("data-id");
         if (!editId) return;
         openEdit(editId);
+        return;
+      }
+      var viewMessageBtn = e.target.closest(".view-message-btn");
+      if (viewMessageBtn) {
+        var messageId = viewMessageBtn.getAttribute("data-id");
+        if (!messageId) return;
+        openMessage(messageId);
       }
     });
 

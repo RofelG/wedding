@@ -6,6 +6,22 @@ const router = Router();
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASS = process.env.ADMIN_PASSWORD || "changeme";
 const ADMIN_COOKIE = "admin_auth";
+const EXPORT_COLUMNS = [
+  { key: "id", label: "Entry ID" },
+  { key: "full_name", label: "Entry Name" },
+  { key: "guest_label", label: "Guest" },
+  { key: "guest_name", label: "Guest Name" },
+  { key: "guest_count", label: "Party Size" },
+  { key: "email", label: "Email" },
+  { key: "attendance", label: "Attendance" },
+  { key: "needs_room_label", label: "Room" },
+  { key: "room_count", label: "Room Count" },
+  { key: "guest_allergies_label", label: "Guest Allergies" },
+  { key: "food_allergies_label", label: "Party Allergies" },
+  { key: "song_request", label: "Song" },
+  { key: "message", label: "Message" },
+  { key: "created_at", label: "Created" },
+];
 
 function hasAdminCookie(req) {
   const cookie = req.headers.cookie || "";
@@ -34,6 +50,140 @@ function checkAuth(req, res, next) {
     return res.redirect("/admin/login");
   }
   return res.status(401).json({ error: "Unauthorized" });
+}
+
+function normalizeRow(row) {
+  const parsedAllergies = row.food_allergies
+    ? (() => {
+        try {
+          return JSON.parse(row.food_allergies);
+        } catch (_) {
+          return row.food_allergies;
+        }
+      })()
+    : [];
+
+  const allergiesLabel = Array.isArray(parsedAllergies)
+    ? parsedAllergies
+        .map((guest) =>
+          guest.name
+            ? guest.name + (guest.allergies ? ` (${guest.allergies})` : "")
+            : guest.allergies
+        )
+        .filter(Boolean)
+        .join("; ")
+    : parsedAllergies || "";
+
+  const needsRoom = row.needs_room ? Boolean(Number(row.needs_room)) : false;
+  const guestCount = Number.parseInt(row.guest_count, 10) || 0;
+  const guestDetails = Array.isArray(parsedAllergies)
+    ? parsedAllergies.map((guest) => ({
+        name: String(guest?.name || "").trim(),
+        allergies: String(guest?.allergies || "").trim(),
+      }))
+    : [];
+  const extraGuestsFromAllergies = Array.isArray(parsedAllergies)
+    ? parsedAllergies
+        .slice(1)
+        .map((guest) => String(guest?.name || "").trim())
+        .filter(Boolean)
+    : [];
+  const extraGuestsFromPlusOnes = String(row.plus_one_names || "")
+    .split(",")
+    .map((name) => name.trim())
+    .filter(Boolean);
+  const partyGuests = guestCount > 0
+    ? [
+        String(row.full_name || "").trim(),
+        ...(extraGuestsFromAllergies.length ? extraGuestsFromAllergies : extraGuestsFromPlusOnes),
+      ].slice(0, guestCount)
+    : [];
+
+  while (partyGuests.length < guestCount) {
+    partyGuests.push("");
+  }
+
+  return {
+    ...row,
+    needs_room: needsRoom,
+    needs_room_label: needsRoom ? "Yes" : "No",
+    guest_count: guestCount,
+    room_count: Number.parseInt(row.room_count, 10) || 0,
+    food_allergies: parsedAllergies,
+    food_allergies_label: allergiesLabel,
+    guest_details: guestDetails,
+    party_guests: partyGuests,
+  };
+}
+
+async function getAdminRows() {
+  const rows = await db.listRsvps();
+  return rows.map(normalizeRow);
+}
+
+function getTotals(rows) {
+  return rows.reduce(
+    (acc, row) => {
+      const count = Number.parseInt(row.guest_count, 10) || 0;
+      const roomGuests = row.needs_room ? Number.parseInt(row.room_count, 10) || 0 : 0;
+      acc.total += count;
+      acc.roomGuests += roomGuests;
+      if (row.needs_room) acc.roomReservations += 1;
+      if ((row.attendance || "").toLowerCase() === "yes") {
+        acc.yes += count;
+      }
+      if ((row.attendance || "").toLowerCase() === "maybe") {
+        acc.maybe += count;
+      }
+      return acc;
+    },
+    { total: 0, yes: 0, maybe: 0, roomGuests: 0, roomReservations: 0 }
+  );
+}
+
+function escapeCsv(value) {
+  const text = String(value ?? "");
+  if (/[",\r\n]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    }[char];
+  });
+}
+
+function exportFileName(ext) {
+  const stamp = new Date().toISOString().slice(0, 10);
+  return `rsvp-export-${stamp}.${ext}`;
+}
+
+function flattenExportRows(rows) {
+  return rows.flatMap((row) => {
+    const guestNames = row.party_guests?.length ? row.party_guests : [String(row.full_name || "").trim()];
+
+    return guestNames.map((guestName, index) => {
+      const guestDetail = row.guest_details?.[index];
+      return {
+        ...row,
+        guest_label: `Guest ${index + 1}`,
+        guest_name: guestName || "",
+        guest_allergies_label: guestDetail?.allergies || "",
+      };
+    });
+  });
+}
+
+function rowValue(row, column) {
+  return row[column.key] ?? "";
 }
 
 router.use((req, res, next) => {
@@ -78,42 +228,71 @@ router.get("/", checkAuth, (req, res) => {
 
 router.get("/data", checkAuth, async (_req, res) => {
   try {
-    const rows = await db.listRsvps();
-    const mapped = rows.map((row) => ({
-      ...row,
-      needs_room: row.needs_room ? Boolean(Number(row.needs_room)) : false,
-      room_count: Number.parseInt(row.room_count, 10) || 0,
-      food_allergies: row.food_allergies
-        ? (() => {
-            try {
-              return JSON.parse(row.food_allergies);
-            } catch (_) {
-              return row.food_allergies;
-            }
-          })()
-        : [],
-    }));
-    const totals = mapped.reduce(
-      (acc, row) => {
-        const count = Number.parseInt(row.guest_count, 10) || 0;
-        const roomGuests = row.needs_room ? Number.parseInt(row.room_count, 10) || 0 : 0;
-        acc.total += count;
-        acc.roomGuests += roomGuests;
-        if (row.needs_room) acc.roomReservations += 1;
-        if ((row.attendance || "").toLowerCase() === "yes") {
-          acc.yes += count;
-        }
-        if ((row.attendance || "").toLowerCase() === "maybe") {
-          acc.maybe += count;
-        }
-        return acc;
-      },
-      { total: 0, yes: 0, maybe: 0, roomGuests: 0, roomReservations: 0 }
-    );
-    res.json({ ok: true, rows: mapped, totals });
+    const rows = await getAdminRows();
+    const totals = getTotals(rows);
+    res.json({ ok: true, rows, totals });
   } catch (err) {
     console.error("Admin data fetch failed", err);
     res.status(500).json({ error: "Failed to fetch RSVPs" });
+  }
+});
+
+router.get("/export", checkAuth, async (req, res) => {
+  const format = String(req.query.format || "csv").toLowerCase();
+  if (!["csv", "xls"].includes(format)) {
+    return res.status(400).json({ error: "Export format must be csv or xls." });
+  }
+
+  try {
+    const rows = await getAdminRows();
+    const exportRows = flattenExportRows(rows);
+
+    if (format === "csv") {
+      const header = EXPORT_COLUMNS.map((column) => escapeCsv(column.label)).join(",");
+      const lines = exportRows.map((row) =>
+        EXPORT_COLUMNS.map((column) => escapeCsv(rowValue(row, column))).join(",")
+      );
+      const csv = ["\uFEFF" + header, ...lines].join("\r\n");
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename="${exportFileName("csv")}"`);
+      return res.send(csv);
+    }
+
+    const headerCells = EXPORT_COLUMNS.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("");
+    const bodyRows = exportRows
+      .map((row) => {
+        const cells = EXPORT_COLUMNS.map((column) => {
+          const value = escapeHtml(rowValue(row, column)).replace(/\r?\n/g, "<br>");
+          return `<td>${value}</td>`;
+        }).join("");
+        return `<tr>${cells}</tr>`;
+      })
+      .join("");
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #cfcfcf; padding: 6px; vertical-align: top; text-align: left; }
+    th { background: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <table>
+    <thead><tr>${headerCells}</tr></thead>
+    <tbody>${bodyRows}</tbody>
+  </table>
+</body>
+</html>`;
+
+    res.setHeader("Content-Type", "application/vnd.ms-excel; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${exportFileName("xls")}"`);
+    return res.send(html);
+  } catch (err) {
+    console.error("Admin export failed", err);
+    return res.status(500).json({ error: "Failed to export RSVPs" });
   }
 });
 
