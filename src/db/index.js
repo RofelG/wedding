@@ -33,6 +33,7 @@ if (client === "mysql" || client === "mariadb") {
         food_allergies TEXT,
         needs_room TINYINT(1) DEFAULT 0,
         room_count INT DEFAULT 0,
+        status VARCHAR(20) NOT NULL DEFAULT 'active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`
     );
@@ -42,11 +43,15 @@ if (client === "mysql" || client === "mariadb") {
     const [cols] = await pool.query("SHOW COLUMNS FROM guests");
     const hasNeedsRoom = cols.some((c) => c.Field === "needs_room");
     const hasRoomCount = cols.some((c) => c.Field === "room_count");
+    const hasStatus = cols.some((c) => c.Field === "status");
     if (!hasNeedsRoom) {
       await pool.query("ALTER TABLE guests ADD COLUMN needs_room TINYINT(1) DEFAULT 0");
     }
     if (!hasRoomCount) {
       await pool.query("ALTER TABLE guests ADD COLUMN room_count INT DEFAULT 0");
+    }
+    if (!hasStatus) {
+      await pool.query("ALTER TABLE guests ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active'");
     }
   };
 
@@ -67,8 +72,8 @@ if (client === "mysql" || client === "mariadb") {
     roomCount,
   }) => {
     const [result] = await pool.query(
-      `INSERT INTO guests (full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies, needs_room, room_count)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO guests (full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies, needs_room, room_count, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')`,
       [
         name,
         email,
@@ -87,7 +92,7 @@ if (client === "mysql" || client === "mariadb") {
 
   listRsvps = async () => {
     const [rows] = await pool.query(
-      "SELECT id, full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies, needs_room, room_count, created_at FROM guests ORDER BY created_at DESC"
+      "SELECT id, full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies, needs_room, room_count, status, created_at FROM guests ORDER BY created_at DESC"
     );
     return rows;
   };
@@ -126,7 +131,7 @@ if (client === "mysql" || client === "mariadb") {
   };
 
   deleteRsvp = async (id) => {
-    await pool.query("DELETE FROM guests WHERE id = ?", [id]);
+    await pool.query("UPDATE guests SET status = 'deleted' WHERE id = ?", [id]);
   };
 } else {
   const dbPath = process.env.DB_PATH || path.join(process.cwd(), "wedding.db");
@@ -145,6 +150,7 @@ if (client === "mysql" || client === "mariadb") {
       food_allergies TEXT,
       needs_room INTEGER DEFAULT 0,
       room_count INTEGER DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'active',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`
   ).run();
@@ -154,6 +160,7 @@ if (client === "mysql" || client === "mariadb") {
   const hasAllergy = columns.some((col) => col.name === "food_allergies");
   const hasNeedsRoom = columns.some((col) => col.name === "needs_room");
   const hasRoomCount = columns.some((col) => col.name === "room_count");
+  const hasStatus = columns.some((col) => col.name === "status");
   if (!hasPlusOne) {
     db.prepare("ALTER TABLE guests ADD COLUMN plus_one_names TEXT").run();
   }
@@ -166,17 +173,20 @@ if (client === "mysql" || client === "mariadb") {
   if (!hasRoomCount) {
     db.prepare("ALTER TABLE guests ADD COLUMN room_count INTEGER DEFAULT 0").run();
   }
+  if (!hasStatus) {
+    db.prepare("ALTER TABLE guests ADD COLUMN status TEXT NOT NULL DEFAULT 'active'").run();
+  }
 
   const insertStmt = db.prepare(
-    `INSERT INTO guests (full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies, needs_room, room_count)
-     VALUES (@name, @email, @attendance, @guests, @song, @message, @plusOneNames, @allergies, @roomNeeded, @roomCount)`
+    `INSERT INTO guests (full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies, needs_room, room_count, status)
+     VALUES (@name, @email, @attendance, @guests, @song, @message, @plusOneNames, @allergies, @roomNeeded, @roomCount, 'active')`
   );
   const listStmt = db.prepare(
-    `SELECT id, full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies, needs_room, room_count, created_at
+    `SELECT id, full_name, email, attendance, guest_count, song_request, message, plus_one_names, food_allergies, needs_room, room_count, status, created_at
      FROM guests
      ORDER BY created_at DESC`
   );
-  const deleteStmt = db.prepare("DELETE FROM guests WHERE id = ?");
+  const deleteStmt = db.prepare("UPDATE guests SET status = 'deleted' WHERE id = ?");
 
   insertRsvp = async ({
     name,
