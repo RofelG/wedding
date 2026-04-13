@@ -12,6 +12,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const capCookie = "rsvp_cap";
 const tokenSecret = process.env.ACCESS_CODE || "LOVE2026";
+const rsvpCloseAtLocal = process.env.RSVP_CLOSE_AT_LOCAL || "2026-04-15T00:00:00";
 const logoUrl = process.env.LOGO_URL || "";
 const logoBase = process.env.LOGO_BASE || "";
 const logoType = process.env.LOGO_TYPE || "";
@@ -82,6 +83,21 @@ function getCapFromCookie(req) {
   const parsed = Number.parseInt(token, 10);
   if (!Number.isFinite(parsed) || parsed < 1) return null;
   return parsed;
+}
+
+function parseLocalDateTime(value) {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
+
+function isRsvpClosed() {
+  const cutoff = parseLocalDateTime(rsvpCloseAtLocal);
+  if (!cutoff) {
+    console.warn(`[RSVP] Invalid RSVP_CLOSE_AT_LOCAL value: ${rsvpCloseAtLocal}`);
+    return false;
+  }
+  return new Date() >= cutoff;
 }
 
 function accessGate(res, navLinks, message, capToken = "") {
@@ -207,6 +223,7 @@ function formatEventDateTime(start, end, timeZone) {
 app.get("/rsvp", (req, res) => {
   const capFromCookie = getCapFromCookie(req);
   const maxGuests = capFromCookie;
+  const closed = isRsvpClosed();
 
   if (!maxGuests) {
     const navLinks = [
@@ -221,7 +238,7 @@ app.get("/rsvp", (req, res) => {
     { href: "/", text: "Home" },
     { href: "/rsvp", text: "RSVP", active: true },
   ];
-  res.render("rsvp", { navLinks, maxGuests });
+  res.render("rsvp", { navLinks, maxGuests, isRsvpClosed: closed, rsvpCloseAtLocal });
 });
 
 app.get("/rsvp/thank-you", (req, res) => {

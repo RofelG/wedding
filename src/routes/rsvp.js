@@ -5,6 +5,22 @@ import db from "../db/index.js";
 const router = Router();
 const ACCESS_CODE = process.env.ACCESS_CODE;
 const CAP_COOKIE = "rsvp_cap";
+const RSVP_CLOSE_AT_LOCAL = process.env.RSVP_CLOSE_AT_LOCAL || "2026-04-15T00:00:00";
+
+function parseLocalDateTime(value) {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
+
+function isRsvpClosed() {
+  const cutoff = parseLocalDateTime(RSVP_CLOSE_AT_LOCAL);
+  if (!cutoff) {
+    console.warn(`[RSVP API] Invalid RSVP_CLOSE_AT_LOCAL value: ${RSVP_CLOSE_AT_LOCAL}`);
+    return false;
+  }
+  return new Date() >= cutoff;
+}
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -41,6 +57,12 @@ router.use((req, res, next) => {
 });
 
 router.post("/", async (req, res) => {
+  if (isRsvpClosed()) {
+    return res
+      .status(403)
+      .json({ error: "RSVP submissions are now closed. Thank you for your understanding." });
+  }
+
   const {
     name,
     email,
