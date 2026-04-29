@@ -19,7 +19,6 @@ const logoType = process.env.LOGO_TYPE || "";
 const publicDir = path.join(process.cwd(), "public");
 const viewsDir = path.join(process.cwd(), "src", "views");
 const trustProxy = process.env.TRUST_PROXY || "1";
-const rsvpCloseAtLocal = process.env.RSVP_CLOSE_AT_LOCAL || "";
 const weddingEvents = [
   {
     key: "ceremony",
