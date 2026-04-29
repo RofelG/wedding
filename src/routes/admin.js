@@ -132,14 +132,16 @@ function getTotals(rows) {
         return acc;
       }
       const count = Number.parseInt(row.guest_count, 10) || 0;
+      const attendance = (row.attendance || "").toLowerCase();
+      if (attendance === "no") return acc;
       const roomGuests = row.needs_room ? Number.parseInt(row.room_count, 10) || 0 : 0;
       acc.total += count;
       acc.roomGuests += roomGuests;
       if (row.needs_room) acc.roomReservations += 1;
-      if ((row.attendance || "").toLowerCase() === "yes") {
+      if (attendance === "yes") {
         acc.yes += count;
       }
-      if ((row.attendance || "").toLowerCase() === "maybe") {
+      if (attendance === "maybe") {
         acc.maybe += count;
       }
       return acc;
