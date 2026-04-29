@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="supported-color-schemes" content="light dark" />
+  <title>Rofel &amp; Julie Ann RSVP Thank You Email</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --wedding-primary: #ca6641;
+      --wedding-secondary: #ff855c;
+      --wedding-accent: #f7e7ce;
+      --wedding-dark: #343a40;
+      --page-bg: #fff9fb;
+      --page-bg-accent: #f6f1eb;
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --card-border: rgba(255, 111, 145, 0.14);
+      --muted: #6c757d;
+      --body-text: #2f2a26;
+      --hero-bg: linear-gradient(130deg, #ffffff, #fff8fb 60%, #ffefe5);
+      --chip-bg: var(--wedding-accent);
+      --chip-text: var(--wedding-primary);
+      --button-bg: var(--wedding-primary);
+      --button-text: #ffffff;
+      --footer-text: #8a817a;
+      --shadow: 0 24px 55px rgba(130, 68, 33, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", Arial, Helvetica, sans-serif;
+      color: var(--body-text);
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255, 182, 193, 0.22), transparent 35%),
+        radial-gradient(circle at 85% 10%, rgba(255, 111, 145, 0.15), transparent 30%),
+        var(--page-bg);
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+
+    .preheader {
+      display: none;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+    }
+
+    .email-wrap {
+      width: 100%;
+      padding: 24px 0;
+      background: transparent;
+    }
+
+    .email-shell {
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .hero {
+      padding: 32px 32px 18px;
+      text-align: center;
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--wedding-primary) 0%, var(--wedding-secondary) 100%);
+      border-radius: 24px 24px 0 0;
+    }
+
+    .brand-mark {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    .hero-title {
+      margin: 12px 0 0;
+      font-family: "Great Vibes", cursive;
+      font-size: 42px;
+      line-height: 1.1;
+      font-weight: 400;
+    }
+
+    .hero-copy {
+      margin: 10px auto 0;
+      max-width: 460px;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .content {
+      padding: 0 18px 18px;
+      background: transparent;
+    }
+
+    .content-card {
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      border-top: 0;
+      border-radius: 0 0 24px 24px;
+      background: var(--card-bg);
+      box-shadow: var(--shadow);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+
+    .intro {
+      padding: 24px 32px 10px;
+    }
+
+    .intro-note {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .template-section {
+      padding: 8px 14px 14px;
+    }
+
+    .template-card {
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid rgba(255, 111, 145, 0.16);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #ffffff, #fffaf7);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.08);
+    }
+
+    .template-head {
+      padding: 28px 28px 14px;
+      border-bottom: 1px solid rgba(255, 111, 145, 0.1);
+    }
+
+    .template-label {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--chip-bg);
+      color: var(--chip-text);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .template-title {
+      margin: 14px 0 0;
+      font-size: 26px;
+      line-height: 1.3;
+      font-weight: 600;
+      color: var(--wedding-dark);
+    }
+
+    .template-body {
+      padding: 28px;
+    }
+
+    .body-copy {
+      margin: 0 0 16px;
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--body-text);
+    }
+
+    .body-copy:last-child {
+      margin-bottom: 0;
+    }
+
+    .details-card {
+      margin: 8px 0 20px;
+      padding: 18px 20px;
+      border: 1px solid rgba(255, 111, 145, 0.14);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(247, 231, 206, 0.5), rgba(255, 255, 255, 0.9));
+    }
+
+    .details-title {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--chip-text);
+    }
+
+    .details-copy {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--body-text);
+    }
+
+    .details-copy:last-child {
+      margin-bottom: 0;
+    }
+
+    .stream-action {
+      margin: 0 0 24px;
+      text-align: center;
+    }
+
+    .calendar-actions {
+      margin: 0 0 24px;
+      text-align: center;
+    }
+
+    .calendar-actions .button {
+      margin: 0 6px 10px;
+    }
+
+    .button-secondary {
+      background: transparent;
+      color: var(--wedding-primary);
+      border: 1px solid var(--wedding-primary);
+    }
+
+    .button {
+      display: inline-block;
+      padding: 14px 24px;
+      border-radius: 999px;
+      background: var(--button-bg);
+      color: var(--button-text);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .footer {
+      padding: 8px 32px 32px;
+      text-align: center;
+    }
+
+    .footer-copy {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--footer-text);
+    }
+
+    @media only screen and (max-width: 700px) {
+      .email-wrap {
+        padding: 12px 0;
+      }
+
+      .hero,
+      .intro,
+      .footer {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .template-head,
+      .template-body {
+        padding: 22px 20px;
+      }
+
+      .hero-title {
+        font-size: 34px;
+      }
+
+      .template-title {
+        font-size: 22px;
+      }
+
+      .body-copy {
+        font-size: 15px;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --wedding-primary: #ff855c;
+        --wedding-secondary: #f7e7ce;
+        --wedding-accent: rgba(255, 133, 92, 0.17);
+        --wedding-dark: #f2f2f2;
+        --page-bg: #0f1116;
+        --page-bg-accent: #141923;
+        --card-bg: rgba(22, 26, 35, 0.88);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --muted: #b9beca;
+        --body-text: #e6e6e6;
+        --hero-bg: linear-gradient(135deg, #1a1f2a, #202635);
+        --chip-bg: rgba(255, 159, 189, 0.18);
+        --chip-text: #ff855c;
+        --button-bg: #ff855c;
+        --button-text: #1a1f2a;
+        --footer-text: #aeb4c0;
+        --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 10% 20%, rgba(255, 159, 189, 0.22), transparent 35%),
+          radial-gradient(circle at 85% 10%, rgba(255, 111, 145, 0.18), transparent 30%),
+          var(--page-bg);
+      }
+
+      .hero {
+        background: var(--hero-bg);
+      }
+
+      .template-card {
+        background: linear-gradient(180deg, #1a1f2a, #1f2533);
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow: none;
+      }
+
+      .details-card {
+        background: linear-gradient(135deg, rgba(255, 133, 92, 0.12), rgba(26, 31, 42, 0.9));
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+
+      .template-head {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+      }
+    }
+  </style>
+</head>
+<body>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="email-wrap">
+    <tr>
+      <td align="center">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="email-shell">
+          <tr>
+            <td class="hero">
+              <div class="brand-mark">Rofel &amp; Julie Ann</div>
+              <h1 class="hero-title">RSVP - Thank You</h1>
+            </td>
+          </tr>
+          <tr>
+            <td class="content">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="content-card">
+                <tr>
+                  <td class="template-section">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="template-card">
+                      <tr>
+                        <td class="template-body">
+                          <p class="body-copy">Hi {{recipient_name}},</p>
+                          <p class="body-copy">
+                            Thank you so much for RSVPing to our wedding. We are so happy that you will be celebrating with us on {{wedding_date}}.
+                          </p>
+                          <div class="details-card">
+                            <p class="details-title">Ceremony Details</p>
+                            <p class="details-copy"><strong>Time:</strong> 2:00 PM (Philippines Time) | 2:00 AM (Eastern Time)</p>
+                            <p class="details-copy"><strong>Place:</strong> Immaculate Conception Parish, Batac City, Ilocos Norte</p>
+                          </div>
+                          <p class="body-copy">
+                            You can save our wedding day to your calendar here:
+                          </p>
+                          <p class="calendar-actions">
+                            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Rofel+%26+Julie+Ann+Wedding+Day&amp;details=Ceremony+and+reception+celebration.%0ACeremony%3A+Immaculate+Conception+Parish%2C+Batac+City%2C+Ilocos+Norte.%0AReception%3A+Playa+Tropical+Resort%2C+Currimao%2C+Ilocos+Norte.&amp;location=Batac+City+%26+Currimao%2C+Ilocos+Norte&amp;dates=20260518T060000Z%2F20260518T140000Z&amp;ctz=Asia%2FManila" class="button">
+                              Add to Google Calendar
+                            </a>
+                            <a href="https://rofel4julieann.com/calendar/wedding-events.ics?download=1" class="button button-secondary">
+                              Download ICS
+                            </a>
+                          </p>
+                          <p class="body-copy">
+                            It means a lot to have you with us, and we truly can't wait to see you and share the day together.
+                          </p>
+                          <p class="body-copy">
+                            With love,<br />
+                            Rofel &amp; Julie Ann
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="template-section">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="template-card">
+                      <tr>
+                        <td class="template-body">
+                          <p class="body-copy">Hi {{recipient_name}},</p>
+                          <p class="body-copy">
+                            Thank you so much for letting us know about your RSVP. While we will miss having you with us in person, we completely understand and appreciate you taking the time to respond.
+                          </p>
+                          <p class="body-copy">
+                            We would still love for you to be part of our day from afar. You can watch the wedding stream here:
+                          </p>
+                          <div class="details-card">
+                            <p class="details-title">Ceremony Details</p>
+                            <p class="details-copy"><strong>Time:</strong> 2:00 PM (Philippines Time) | 2:00 AM (Eastern Time)</p>
+                            <p class="details-copy"><strong>Place:</strong> Immaculate Conception Parish, Batac City, Ilocos Norte</p>
+                          </div>
+                          <p class="body-copy">
+                            You can also save our wedding day to your calendar here:
+                          </p>
+                          <p class="calendar-actions">
+                            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Rofel+%26+Julie+Ann+Wedding+Day&amp;details=Ceremony+and+reception+celebration.%0ACeremony%3A+Immaculate+Conception+Parish%2C+Batac+City%2C+Ilocos+Norte.%0AReception%3A+Playa+Tropical+Resort%2C+Currimao%2C+Ilocos+Norte.&amp;location=Batac+City+%26+Currimao%2C+Ilocos+Norte&amp;dates=20260518T060000Z%2F20260518T140000Z&amp;ctz=Asia%2FManila" class="button">
+                              Add to Google Calendar
+                            </a>
+                            <a href="https://rofel4julieann.com/calendar/wedding-events.ics?download=1" class="button button-secondary">
+                              Download ICS
+                            </a>
+                          </p>
+                          <p class="stream-action">
+                            <a href="{{stream_url}}" class="button">
+                              Watch the Wedding Stream
+                            </a>
+                          </p>
+                          <p class="body-copy">
+                            We are grateful for your love and support, and we can't wait to share this special moment with you online.
+                          </p>
+                          <p class="body-copy">
+                            With love,<br />
+                            Rofel &amp; Julie Ann
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="footer">
+                    <p class="footer-copy">
+                      This file is a standalone HTML reference template and is not yet wired to an email service.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
