@@ -13,8 +13,11 @@
     .badge-yes { background: #198754; }
     .badge-maybe { background: #ffc107; color: #111; }
     .badge-no { background: #dc3545; }
+    .badge-active { background: #0d6efd; }
+    .badge-deleted { background: #6c757d; }
     .card { background: #161a23; border: 1px solid rgba(255,255,255,0.08); }
     .pill { border-radius: 999px; padding: 2px 10px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.08); }
+    .row-deleted { opacity: 0.65; }
   </style>
 </head>
 <body>
@@ -31,6 +34,7 @@
         <span class="pill text-muted">Protected</span>
         <span class="pill" id="guestCountPill">Guests: --</span>
         <span class="pill" id="roomCountPill">Rooms: --</span>
+        <span class="pill" id="deletedCountPill">Deleted: --</span>
       </div>
     </div>
     <div id="status" class="alert alert-info">Loading responses…</div>
@@ -43,6 +47,7 @@
                 <th>#</th>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Status</th>
                 <th>Attendance</th>
                 <th>Guests</th>
                 <th>Room</th>
@@ -161,6 +166,11 @@
       return att || "";
     }
 
+    function statusBadge(status) {
+      if (status === "deleted") return '<span class="badge badge-deleted">Deleted</span>';
+      return '<span class="badge badge-active">Active</span>';
+    }
+
     function escapeHtml(value) {
       return String(value || "").replace(/[&<>"']/g, function (char) {
         return {
@@ -215,11 +225,15 @@
         if (data.totals && typeof data.totals.total !== "undefined") {
           var pill = document.getElementById("guestCountPill");
           var roomPill = document.getElementById("roomCountPill");
+          var deletedPill = document.getElementById("deletedCountPill");
           if (pill) {
             pill.textContent = "Expected: " + (data.totals.yes || 0) + " (Yes) / " + (data.totals.total || 0) + " (All)";
           }
           if (roomPill) {
             roomPill.textContent = "Rooms: " + (data.totals.roomReservations || 0) + " / People: " + (data.totals.roomGuests || 0);
+          }
+          if (deletedPill) {
+            deletedPill.textContent = "Deleted: " + (data.totals.deleted || 0);
           }
         }
         var tbody = document.querySelector("#rsvpTable tbody");
@@ -228,10 +242,14 @@
         data.rows.forEach(function (row) {
           rsvpRows.set(row.id, row);
           var tr = document.createElement("tr");
+          if (row.status === "deleted") {
+            tr.className = "row-deleted";
+          }
           tr.innerHTML = `
             <td>${row.id}</td>
             <td>${escapeHtml(row.full_name)}</td>
             <td>${escapeHtml(row.email)}</td>
+            <td>${statusBadge(row.status)}</td>
             <td>${badge(row.attendance)}</td>
             <td>${row.guest_count}</td>
             <td>${escapeHtml(fmtRoom(row))}</td>
@@ -243,7 +261,7 @@
             <td>${escapeHtml(row.created_at || "")}</td>
             <td class="text-nowrap">
               <button class="btn btn-sm btn-outline-light edit-btn" data-id="${row.id}">Edit</button>
-              <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${row.id}">Delete</button>
+              <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${row.id}" ${row.status === "deleted" ? "disabled" : ""}>Delete</button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -261,7 +279,7 @@
         var data = await res.json();
         if (!res.ok) throw new Error(data.error || "Delete failed");
         status.className = "alert alert-success mt-3";
-        status.textContent = "RSVP deleted.";
+        status.textContent = "RSVP marked as deleted.";
         await loadData();
       } catch (err) {
         status.className = "alert alert-danger mt-3";
@@ -344,7 +362,7 @@
       if (delBtn) {
         var id = delBtn.getAttribute("data-id");
         if (!id) return;
-        var confirmed = window.confirm("Delete this RSVP? This cannot be undone.");
+        var confirmed = window.confirm("Mark this RSVP as deleted? It will stay in the database with deleted status.");
         if (!confirmed) return;
         deleteRsvp(id);
         return;
