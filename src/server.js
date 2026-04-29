@@ -18,6 +18,7 @@ const logoType = process.env.LOGO_TYPE || "";
 const publicDir = path.join(process.cwd(), "public");
 const viewsDir = path.join(process.cwd(), "src", "views");
 const trustProxy = process.env.TRUST_PROXY || "1";
+const rsvpCloseAtLocal = process.env.RSVP_CLOSE_AT_LOCAL || "";
 const weddingEvents = [
   {
     key: "ceremony",
@@ -335,6 +336,11 @@ app.get("/", (req, res) => {
   ];
   const calendarLinks = buildCalendarLinks(req);
   const combinedGoogleEvent = buildCombinedGoogleEvent(weddingEvents);
+  const closeAt = rsvpCloseAtLocal ? new Date(rsvpCloseAtLocal) : null;
+  const showCeremonyLivestream =
+    closeAt instanceof Date
+    && !Number.isNaN(closeAt.getTime())
+    && Date.now() >= closeAt.getTime();
   const { displayDate, displayTime } = formatEventDateTime(
     combinedGoogleEvent.start,
     combinedGoogleEvent.end,
@@ -349,6 +355,7 @@ app.get("/", (req, res) => {
     calendarGoogleUrl: buildGoogleCalendarLink(combinedGoogleEvent),
     calendarDisplayDate: displayDate,
     calendarDisplayTime: displayTime,
+    showCeremonyLivestream,
   });
 });
 
