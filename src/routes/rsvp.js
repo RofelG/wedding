@@ -153,6 +153,11 @@ router.post("/", requireInvitationCookie, async (req, res) => {
 
 // Guestbook route - allows simple name + message submissions after RSVP closes
 router.post("/guestbook", async (req, res) => {
+  console.log("[RSVP Guestbook] Request received", { 
+    body: req.body, 
+    closed: isRsvpClosed() 
+  });
+
   // Only allow guestbook submissions when RSVP is closed
   if (!isRsvpClosed()) {
     return res
@@ -175,9 +180,18 @@ router.post("/guestbook", async (req, res) => {
   }
 
   try {
+    // Generate unique email for guestbook entries without email
+    const guestbookEmail = email?.trim() || `guestbook-${Date.now()}-${Math.random().toString(36).substring(7)}@placeholder.local`;
+    
+    console.log("[RSVP Guestbook] Attempting to save:", {
+      name: name.trim(),
+      email: guestbookEmail,
+      messageLength: message.trim().length
+    });
+
     const result = await db.insertRsvp({
       name: name.trim(),
-      email: email?.trim() || "guestbook@placeholder.com",
+      email: guestbookEmail,
       guests: 0,
       attendance: "guestbook",
       song: null,
@@ -187,9 +201,16 @@ router.post("/guestbook", async (req, res) => {
       roomNeeded: false,
       roomCount: 0,
     });
+    
+    console.log("[RSVP Guestbook] Successfully saved with ID:", result.id);
     res.json({ ok: true, id: result.id });
   } catch (err) {
     console.error("Failed to save guestbook entry", err);
+    console.error("Error details:", {
+      message: err.message,
+      stack: err.stack,
+      code: err.code
+    });
     res.status(500).json({ error: "Failed to save your message. Please try again." });
   }
 });
