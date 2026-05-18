@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.textContent = 'Sending...';
 
     try {
-      const response = await fetch('/rsvp/guestbook', {
+      const response = await fetch('/api/rsvp/guestbook', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
