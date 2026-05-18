@@ -221,10 +221,21 @@ function formatEventDateTime(start, end, timeZone) {
 }
 
 app.get("/rsvp", (req, res) => {
-  const capFromCookie = getCapFromCookie(req);
-  const maxGuests = capFromCookie;
   const closed = isRsvpClosed();
+  const capFromCookie = getCapFromCookie(req);
+  
+  // If RSVP is closed, allow access without password (for guestbook)
+  if (closed) {
+    const navLinks = [
+      { href: "/", text: "Home" },
+      { href: "/rsvp", text: "RSVP", active: true },
+    ];
+    res.render("rsvp", { navLinks, maxGuests: 0, isRsvpClosed: closed, rsvpCloseAtLocal });
+    return;
+  }
 
+  // RSVP is still open, require access code
+  const maxGuests = capFromCookie;
   if (!maxGuests) {
     const navLinks = [
       { href: "/", text: "Home" },

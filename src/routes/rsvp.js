@@ -31,7 +31,8 @@ const limiter = rateLimit({
 
 router.use(limiter);
 
-router.use((req, res, next) => {
+// Middleware to check for invitation cookie - only used for regular RSVP submissions
+function requireInvitationCookie(req, res, next) {
   const cookie = req.headers.cookie || "";
   const capToken = cookie
     .split(";")
@@ -54,9 +55,9 @@ router.use((req, res, next) => {
   );
   req.maxGuests = capValue;
   next();
-});
+}
 
-router.post("/", async (req, res) => {
+router.post("/", requireInvitationCookie, async (req, res) => {
   if (isRsvpClosed()) {
     return res
       .status(403)
