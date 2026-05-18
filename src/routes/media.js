@@ -9,6 +9,7 @@ const MEDIA_COOKIE = process.env.MEDIA_COOKIE || "media_auth";
 const MEDIA_CODE = process.env.MEDIA_ACCESS_CODE || process.env.ACCESS_CODE || "LOVE2026";
 const MEDIA_OPEN_DATE = process.env.MEDIA_OPEN_DATE || "2026-05-18T00:00:00Z";
 const MEDIA_FORCE_OPEN = process.env.MEDIA_FORCE_OPEN === "true";
+const RSVP_CLOSE_AT_LOCAL = process.env.RSVP_CLOSE_AT_LOCAL || "2026-04-15T00:00:00";
 
 const uploadsDir = process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -36,7 +37,25 @@ function unauthorized(res, message = "Unauthorized") {
   res.status(401).send(message);
 }
 
+function parseLocalDateTime(value) {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
+
+function isRsvpClosed() {
+  const cutoff = parseLocalDateTime(RSVP_CLOSE_AT_LOCAL);
+  if (!cutoff) {
+    console.warn(`[Media] Invalid RSVP_CLOSE_AT_LOCAL value: ${RSVP_CLOSE_AT_LOCAL}`);
+    return false;
+  }
+  return new Date() >= cutoff;
+}
+
 function hasAccess(req) {
+  // If RSVP is closed, grant access automatically
+  if (isRsvpClosed()) return true;
+  
   const cookie = req.headers.cookie || "";
   const hasCookie = cookie
     .split(";")
@@ -48,6 +67,8 @@ function hasAccess(req) {
 }
 
 function isOpen() {
+  // If RSVP is closed, uploads are open
+  if (isRsvpClosed()) return true;
   if (MEDIA_FORCE_OPEN) return true;
   const now = new Date();
   const openDate = new Date(MEDIA_OPEN_DATE);
@@ -128,14 +149,18 @@ router.post("/upload", hasMediaAccess, uploadMany, async (req, res) => {
 });
 
 router.get("/gallery", (req, res) => {
-  if (!hasAccess(req)) {
+  const closed = isRsvpClosed();
+  
+  // If RSVP is closed, allow access without password
+  if (!closed && !hasAccess(req)) {
     return unauthorized(res, "Access code required");
   }
-  if (!isOpen()) {
+  if (!closed && !isOpen()) {
     return res
       .status(403)
       .send("Uploads will open on the wedding day. Please check back later.");
   }
+  
   const navLinks = [
     { href: "/", text: "Home" },
     { href: "/rsvp", text: "RSVP" },
@@ -358,6 +383,10 @@ function parseExifDateString(value) {
 }
 
 function hasMediaAccess(req, res, next) {
+  // Bypass access check if RSVP is closed
+  if (isRsvpClosed()) {
+    return next();
+  }
   if (!hasAccess(req)) {
     return res.status(401).json({ error: "Access code required" });
   }
