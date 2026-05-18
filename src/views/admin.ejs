@@ -13,6 +13,7 @@
     .badge-yes { background: #198754; }
     .badge-maybe { background: #ffc107; color: #111; }
     .badge-no { background: #dc3545; }
+    .badge-guestbook { background: #8b5cf6; }
     .badge-active { background: #0d6efd; }
     .badge-deleted { background: #6c757d; }
     .card { background: #161a23; border: 1px solid rgba(255,255,255,0.08); }
@@ -92,6 +93,7 @@
                 <option value="yes">Yes</option>
                 <option value="maybe">Maybe</option>
                 <option value="no">No</option>
+                <option value="guestbook">Guestbook</option>
               </select>
             </div>
             <div class="col-md-4">
@@ -163,6 +165,7 @@
       if (att === "yes") return '<span class="badge badge-yes">Yes</span>';
       if (att === "maybe") return '<span class="badge badge-maybe">Maybe</span>';
       if (att === "no") return '<span class="badge badge-no">No</span>';
+      if (att === "guestbook") return '<span class="badge badge-guestbook">Guestbook</span>';
       return att || "";
     }
 

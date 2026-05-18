@@ -150,4 +150,47 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Guestbook route - allows simple name + message submissions after RSVP closes
+router.post("/guestbook", async (req, res) => {
+  // Only allow guestbook submissions when RSVP is closed
+  if (!isRsvpClosed()) {
+    return res
+      .status(400)
+      .json({ error: "Guestbook submissions are only available after RSVP closes." });
+  }
+
+  const { name, email, message } = req.body || {};
+
+  if (!name || !message) {
+    return res.status(400).json({ error: "Name and message are required." });
+  }
+
+  if (name.trim().length < 2) {
+    return res.status(400).json({ error: "Please provide a valid name." });
+  }
+
+  if (message.trim().length < 5) {
+    return res.status(400).json({ error: "Please provide a meaningful message." });
+  }
+
+  try {
+    const result = await db.insertRsvp({
+      name: name.trim(),
+      email: email?.trim() || "guestbook@placeholder.com",
+      guests: 0,
+      attendance: "guestbook",
+      song: null,
+      message: message.trim(),
+      plusOneNames: null,
+      allergies: null,
+      roomNeeded: false,
+      roomCount: 0,
+    });
+    res.json({ ok: true, id: result.id });
+  } catch (err) {
+    console.error("Failed to save guestbook entry", err);
+    res.status(500).json({ error: "Failed to save your message. Please try again." });
+  }
+});
+
 export default router;
